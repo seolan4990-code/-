@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>한도조회 결과 v1</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+<style>
+  :root{
+    --c-primary:#2B5CE6;
+    --c-accent-warn:#E8821A; --c-tobe:#15A06B;
+    --c-text:#161B2E; --c-text-sub:#5B6377; --c-text-muted:#9298A8;
+    --c-line:#EAEDF3; --c-bg:#EEF1F7; --c-surface:#FFFFFF; --c-badge-bg:#F0F2F7;
+    --c-stage:#F7F8FC;
+    --font-base:"Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  }
+  *{box-sizing:border-box;} html,body{margin:0; padding:0;}
+  body{font-family:var(--font-base);color:var(--c-text);background:var(--c-bg);-webkit-font-smoothing:antialiased; padding:20px;}
+
+  .main-layout { display: grid; grid-template-columns: 1fr 460px; gap: 20px; max-width: 1600px; margin: 0 auto; }
+  @media(max-width: 1040px){ .main-layout { grid-template-columns: 1fr; } }
+
+  .head{margin-bottom:16px; border-bottom: 2px solid var(--c-line); padding-bottom: 10px;}
+  .head__title{font-size:24px; font-weight:850; letter-spacing:-.02em; color: var(--c-text); margin: 0 0 4px 0;}
+  .head__sub{font-size:13px; color:var(--c-text-sub); font-weight: 500;}
+
+  .stage{background:var(--c-stage);border:1px solid var(--c-line);border-radius:18px;padding:16px;margin-bottom:20px;}
+  
+  .control-panel{display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:16px; background:#fff; padding:12px; border-radius:12px; border:1px solid var(--c-line);}
+  .control-row{display:flex; align-items:center; gap:10px; width:100%; justify-content:center; flex-wrap:wrap;}
+  .control-label{font-size:12px; font-weight:800; color:var(--c-text-sub); min-width:80px;}
+  
+  .view-selector, .condition-selector{display:inline-flex; background:#EDEFF4; border-radius:8px; padding:3px; gap:2px;}
+  .view-selector button, .condition-selector button{border:0; background:none; font-family:inherit; font-size:11px; font-weight:700; padding:5px 12px; border-radius:6px; color:var(--c-text-muted); cursor:pointer;}
+  .view-selector button.active, .condition-selector button.active{background:#fff; color:var(--c-text); box-shadow:0 1px 3px rgba(0,0,0,0.08); font-weight:800;}
+  .view-selector button.active { color:var(--c-primary); }
+  .condition-selector button.active{color:#E8821A; border:0.5px solid #F3DCBE;}
+
+  .stagecap{text-align:center;font-size:11.5px;color:var(--c-text-muted);margin:-2px 0 12px;min-height:16px;font-weight:600;}
+
+  /* 스마트폰 가로길이 380px 고정 */
+  .deck{display:flex; justify-content:center; width:100%; min-height:820px;}
+  .phone{width:380px; height:800px; background:#0C0F15; border-radius:40px; padding:12px; box-shadow:0 20px 40px -10px rgba(20,28,48,.2); position:relative;}
+  .phone__screen{background:#fff; border-radius:30px; overflow:hidden; height:100%; position:relative; display:flex; flex-direction:column;}
+  .phone__bar{height:20px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;}
+  .phone__bar::after{content:""; width:90px; height:4px; border-radius:999px; background:#E4E7EE;}
+  
+  .device-view{display:none; flex:1; overflow:hidden; flex-direction:column;}
+  .device-view.is-active{display:flex;}
+  
+  .scr{flex:1; overflow:hidden; display:flex; flex-direction:column;}
+  
+  /* GNB 헤더 시스템 (가운데 정렬) */
+  .phone-gnb {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: #fff;
+    border-bottom: 1px solid var(--c-line);
+    flex: 0 0 auto;
+    padding: 0 16px;
+  }
+  .phone-gnb__title {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #161B2E;
+    letter-spacing: -0.01em;
+  }
+  .phone-gnb__action {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--c-text-sub);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .scr__body{flex:1; overflow:auto; padding:16px 16px 0; scroll-behavior: smooth;}
+  .scr__body::-webkit-scrollbar{width:0;}
+  
+  /* 하단 영역 버튼 배치 */
+  .scr__btnwrap{padding:12px 16px 16px; display:flex; flex-direction:column; gap:8px; background:#fff; border-top:1px solid var(--c-line);}
+  .scr__cta{width:100%; border:0; cursor:pointer; background:#CBD0DC; color:#fff; font-family:inherit;font-size:14.5px;font-weight:700;padding:15px;border-radius:14px; text-align:center; transition: all 0.15s; letter-spacing:-0.02em;}
+  .scr__cta.is-ready{background:var(--c-primary); color:#fff; cursor:pointer;}
+  .scr__cta.asis-style{background:#CBD0DC; color:#fff;}
+  .scr__cta.asis-style.is-ready{background:#1D57DF;}
+  
+  .tb-quick-chip{display:flex; width:100%; height:48px; align-items:center; justify-content:center; background:var(--c-surface); border-radius:14px; border:1px solid var(--c-primary); font-size:14px; font-weight:700; color:var(--c-primary); cursor:pointer; transition:all 0.15s; box-shadow: 0 2px 6px rgba(43,92,230,0.06);}
+  .tb-quick-chip.is-hidden-btn { display:none !important; }
+
+  /* 우측 범용 패널 */
+  .side-panel { display: flex; flex-direction: column; gap: 16px; }
+  .info-card { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 14px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.015); }
+  .info-card__title { font-size: 14px; font-weight: 800; color: var(--c-text); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--c-line); padding-bottom: 6px;}
+  .info-card__title-text { display: flex; align-items: center; gap: 4px; }
+  .info-card__desc { font-size: 12.5px; color: var(--c-text-sub); line-height: 1.55; word-break: keep-all; }
+  
+  /* 동적 에디터 및 코멘트 컴포넌트 */
+  .desc-textarea { width: 100%; height: 110px; border: 1px solid var(--c-line); border-radius: 6px; padding: 8px; font-family: inherit; font-size: 12px; resize: none; margin-bottom: 6px; color: var(--c-text); line-height: 1.4; }
+  .desc-btn-wrap { display: flex; justify-content: flex-end; gap: 4px; }
+  
+  .btn-sm { padding: 4px 8px; font-size: 11px; font-weight: 700; border-radius: 5px; cursor: pointer; border: 1px solid var(--c-line); background: #fff; color: var(--c-text-sub); }
+  .btn-sm.primary { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
+  .btn-sm.danger { background: #FDE8E8; color: #E02424; border-color: #F8B4B4; }
+
+  /* 코멘트 리스트 */
+  .comment-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 180px; overflow-y: auto; }
+  .comment-item { background: var(--c-stage); padding: 8px; border-radius: 6px; border: 1px solid var(--c-line); font-size: 11.5px; line-height: 1.4; position: relative;}
+  .comment-meta { display: flex; justify-content: space-between; font-weight: 700; color: var(--c-primary); margin-bottom: 2px; font-size: 10.5px; }
+  .comment-del { color: #E02424; cursor: pointer; font-weight: 800; font-size: 10px; margin-left: auto;}
+
+  /* 히스토리 컴포넌트 */
+  .history-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; margin-top: 6px;}
+  .history-table th, .history-table td { padding: 6px; border-bottom: 1px solid var(--c-line); }
+  .history-table th { background: var(--c-stage); font-weight: 700; color: var(--c-text-sub); }
+  .history-table td { color: var(--c-text); vertical-align: middle;}
+  .badge-v { inline-block; padding: 1px 4px; font-size: 9.5px; font-weight: 700; background: var(--c-badge-bg); color: var(--c-text-sub); border-radius: 3px; }
+  .badge-v.tobe { background: #E6F7ED; color: var(--c-tobe); }
+  
+  .history-form { display: grid; grid-template-columns: 75px 65px 1fr; gap: 4px; margin-bottom: 8px; padding: 8px; background: var(--c-stage); border-radius: 6px; border: 1px solid var(--c-line); }
+  .history-form input, .history-form select { border: 1px solid var(--c-line); padding: 4px; font-size: 11px; border-radius: 4px; font-family: inherit; }
+
+  /* ===== AS-IS 양식 ===== */
+  .as-recommend-zone { display:block; }
+  .as-top-indicator { display:flex; align-items:center; gap:4px; font-size:14px; font-weight:800; color:#161B2E; margin:2px 0 8px; }
+  .as-star { color:#E8821A; font-size:15px; }
+  
+  .as-summary-box{border:1.2px solid #E6E8EF; border-radius:14px; padding:14px; margin-bottom:14px; background:#fff;}
+  .as-summary-box .as-sum-headline { font-size:15px; font-weight:800; color:#161B2E; margin-bottom:10px; letter-spacing:-0.02em; }
+  
+  .as-sum-row{display:flex; align-items:center; font-size:12.5px; margin-bottom:8px; padding-bottom:2px;}
+  .as-sum-row .name{font-weight:500; color:var(--c-text-sub); width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .as-sum-row .divider-line { width:1px; height:10px; background:#E4E7EE; margin:0 10px; }
+  .as-sum-row .rate{color:var(--c-text-sub); font-weight:500;}
+  .as-sum-row .val{font-weight:800; color:#1D57DF; margin-left:auto;}
+  
+  .as-quick-btn{width:100%; border:0; background:#1D57DF; color:#fff; font-size:13.5px; font-weight:700; padding:10px; border-radius:8px; margin-top:6px; cursor:pointer;}
+  
+  .as-title-label{font-size:13.5px; font-weight:700; margin:12px 0 8px; color:#161B2E;}
+  .as-tabs{display:grid; grid-template-columns:1fr 1fr; background:#EDEFF4; border-radius:8px; padding:2px; margin-bottom:12px;}
+  .as-tabs button{border:0; background:none; font-family:inherit; font-size:12px; font-weight:700; padding:6px; color:var(--c-text-muted); cursor:pointer;}
+  .as-tabs button.on{background:#fff; color:#161B2E; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.05);}
+
+  .as-card{border:1.2px solid #E6E8EF; border-radius:16px; padding:16px; margin-bottom:10px; background:#fff; position:relative; cursor:pointer;}
+  .as-cardname{font-size:14px; font-weight:800; color:#161B2E; margin-bottom:6px; letter-spacing:-0.01em;}
+  .as-cardmeta{display:flex; font-size:12.5px; color:var(--c-text-sub); font-weight:500;}
+  .as-cardmeta b{color:var(--c-primary); font-weight:800; margin-left:2px;}
+  .as-cardmeta .lbl { color:var(--c-text-muted); margin-right:2px; }
+  
+  .as-circle{position:absolute; right:16px; top:50%; transform:translateY(-50%); width:22px; height:22px; border:1.5px solid #CBD0DD; border-radius:50%; background:#fff;}
+  .as-card.sel { border-color:#1D57DF; background:#fff; box-shadow:0 4px 10px rgba(29,87,223,0.03); }
+  .as-card.sel .as-circle { border-color:#1D57DF; background:#1D57DF; }
+  .as-card.sel .as-circle::after { content:""; position:absolute; left:6px; top:6px; width:8px; height:8px; background:#fff; border-radius:50%; }
+
+  .as-notice{border-top:1px solid #F0F1F4; margin-top:16px; padding-top:12px;}
+  .as-notice-h{font-size:12px; font-weight:700; color:var(--c-text-sub); display:flex; align-items:center; gap:4px;}
+  .as-notice-b{font-size:11px; color:var(--c-text-muted); line-height:1.6; margin-top:6px;}
+
+  /* ===== ② 토스 참고용 웹뷰 스타일 ===== */
+  .toss-head{font-size:20px; font-weight:800; line-height:1.4; color:#161B2E; margin:6px 0; letter-spacing:-0.02em;}
+  .toss-sub{font-size:13px; color:var(--c-text-sub); margin-bottom:20px;}
+  .toss-card{padding:14px 4px; margin-bottom:10px; cursor:pointer; position:relative; border-bottom: 1px solid #F4F5F8;}
+  .toss-card.sel { background: #F1F6FF; border-radius: 10px; padding: 14px 10px; border-bottom: 0; }
+  .toss-cname{font-size:13px; color:var(--c-text-muted); margin-bottom:2px; font-weight:600;}
+  .toss-cfig{font-size:17px; font-weight:800; color:#161B2E;}
+  .toss-cfig span{color:#C5CAD4; margin:0 4px;}
+  .toss-brand-text{text-align:center; font-size:11px; color:var(--c-text-muted); margin-top:12px;}
+
+  /* ===== ③ TO-BE 개편안 스타일 명세 (1줄 타이틀 최적화) ===== */
+  .tb-header-wrap{margin:8px 0 20px 0;}
+  .tb-main-title{
+    font-size: 19.5px; 
+    font-weight: 850; 
+    line-height: 1.2; 
+    margin: 0 0 8px 0; 
+    letter-spacing: -0.04em; 
+    color: #161B2E;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+  .tb-main-title b{color:var(--c-primary); font-weight:900;}
+  .tb-sub-title{font-size:13px; color:var(--c-text-sub); margin:0; font-weight:500; letter-spacing:-0.01em;}
+  
+  .g-sec{margin-bottom:20px;}
+  .g-sec.hide-header .g-head { display:none !important; }
+  
+  .g-head{display:flex; flex-direction:column; margin:0 2px 10px; border-bottom:1.5px solid var(--c-line); padding-bottom:6px;}
+  .g-title{font-size:14.5px; font-weight:800; color:#161B2E;}
+  
+  .g-head-main{display:flex; align-items:center; justify-content:space-between; position:relative;}
+  .tb-sort-select-wrapper { position: relative; display: inline-block; }
+  .tb-sort-select{
+    appearance:none; -webkit-appearance:none; 
+    font-family:inherit; font-size:12.5px; font-weight:700; color:var(--c-text-sub); 
+    background-color:#F0F2F7; 
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><path d="M2.5 4L5 6.5L7.5 4" fill="none" stroke="%235B6377" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'); 
+    background-repeat:no-repeat; background-position:right 12px center; 
+    border:0; border-radius:8px; padding:6px 32px 6px 12px; cursor:pointer;
+  }
+  
+  .g-warn-container{display:none; background:#EDF3FF; border:1px solid #D6E1FB; border-radius:10px; padding:10px; margin-top:4px;}
+  .g-warn-msg{font-size:11.5px; font-weight:700; color:#2B5CE6; line-height:1.4;}
+  .g-unlock-btn{display:block; width:100%; text-align:center; background:#fff; border:1px solid #B0C7FA; color:#1E47C7; font-size:11px; font-weight:800; padding:6px; margin-top:6px; border-radius:6px; cursor:pointer;}
+
+  .g-cards-wrapper{display:flex; flex-direction:column;}
+  .g-cards-wrapper.blocked-zone .as-card{opacity:0.35;}
+
+  .g-pick-marker { position:absolute; right:16px; top:50%; transform:translateY(-50%); width:22px; height:22px; border:1.5px solid #CBD0DD; background:#fff; transition:all 0.12s; display:flex; align-items:center; justify-content:center; }
+  
+  /* 다건(기본): 네모 스퀘어 체크박스 및 V체크 매핑 */
+  .phone:not(.mode-single) .g-pick-marker { border-radius: 6px; }
+  .phone:not(.mode-single) .as-card.sel { border-color: var(--c-primary); background: #F7F9FF; box-shadow: 0 4px 12px rgba(43,92,230,0.04); }
+  .phone:not(.mode-single) .as-card.sel .g-pick-marker { border-color: var(--c-primary); background: var(--c-primary); }
+  .phone:not(.mode-single) .as-card.sel .g-pick-marker::after { content:""; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg) translateY(-1px); }
+
+  /* 단건 전용: 라디오 서클 인디케이터 */
+  .phone.mode-single .g-pick-marker { border-radius: 50%; }
+  .phone.mode-single .as-card.sel { border-color: var(--c-primary); background: #F7F9FF; }
+  .phone.mode-single .as-card.sel .g-pick-marker { border-color: var(--c-primary); background: var(--c-primary); }
+  .phone.mode-single .as-card.sel .g-pick-marker::after { content:""; width:6px; height:6px; background:#fff; border-radius:50%; }
+
+  .tb-new-badge {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    background: #E6F7ED;
+    color: var(--c-tobe);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .as-card.has-badge { padding-top: 32px; }
+</style>
+</head>
+<body>
+
+<div class="main-layout">
+  
+  <!-- 좌측 모바일 에뮬레이터 덱 보드 -->
+  <div class="main-content">
+    <div class="head">
+      <h1 class="head__title">비대면 한도조회 결과 v1</h1>
+      <div class="head__sub">GNB 화면이름 가운데 정렬 헤더 시스템 및 최대한도 복합 가산 로직 검증 프로토타입</div>
+    </div>
+
+    <div class="stage">
+      <div class="control-panel">
+        <div class="control-row" style="margin-bottom: 4px;">
+          <span class="control-label">🖥️ 화면 모드:</span>
+          <div class="view-selector" id="viewSelector">
+            <button type="button" class="active" data-view="asis">AS-IS (현행 복원)</button>
+            <button type="button" data-view="toss">토스 참고 (웹뷰)</button>
+            <button type="button" data-view="tobe">TO-BE 개편안</button>
+          </div>
+        </div>
+        <div class="control-row">
+          <span class="control-label">⚡ 심사 케이스:</span>
+          <div class="condition-selector" id="conditionSelector">
+            <button type="button" data-cond="single">1. 단건 노출 (참신한500)</button>
+            <button type="button" class="active" data-cond="all">2. 다건 노출 (전체 6종 복합)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stagecap" id="cap">AS-IS 현행 화면 모드</div>
+
+      <!-- 정밀 가로길이 380px 에뮬레이팅 스마트폰 시스템 고정 -->
+      <div class="deck">
+        <div class="phone" id="phoneWrapper">
+          <div class="phone__screen">
+            <div class="phone__bar"></div>
+            
+            <!-- ================= ① AS-IS 뷰 ================= -->
+            <div class="device-view is-active" data-view="asis">
+              <div class="scr">
+                <div class="phone-gnb">
+                  <div class="phone-gnb__title">한도조회 결과</div>
+                  <div class="phone-gnb__action">취소</div>
+                </div>
+
+                <div class="scr__body" id="asisScrollBody" style="background:#FAFAFB;">
+                  <div class="as-recommend-zone" id="asRecommendZone">
+                    <div class="as-top-indicator">
+                      <span class="as-star">★</span> <b>최적상품추천</b>
+                    </div>
+                    <div class="as-summary-box">
+                      <div class="as-sum-headline">최대 <b id="asSumTotal">2,690만원까지</b> 신청 가능해요</div>
+                      <div id="asSummaryList"></div>
+                      <button type="button" class="as-quick-btn" id="asQuickBtn">한번에 신청</button>
+                    </div>
+                  </div>
+                  
+                  <div class="as-title-label" id="asMainTitle">원하는 상품을 선택해 주세요.</div>
+                  <div class="as-tabs" id="asTabsRow">
+                    <button class="on">금리낮은순</button>
+                    <button>한도높은순</button>
+                  </div>
+                  <div id="asCardsContainer"></div>
+                  <div class="as-notice">
+                    <div class="as-notice-h">ⓘ 송금시간 안내</div>
+                    <div class="as-notice-b">• 당일 모든 절차 완료 시 즉시 송금 처리됩니다.</div>
+                  </div>
+                </div>
+                <div class="scr__btnwrap" style="background:#FAFAFB;">
+                  <button class="scr__cta asis-style" id="asCtaBtn">상품 선택</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ================= ② 토스 참고 웹뷰 ================= -->
+            <div class="device-view" data-view="toss">
+              <div class="scr">
+                <div class="scr__body" id="tossScrollBody">
+                  <div class="toss-head">대출 신청할 상품을<br>선택해주세요</div>
+                  <div class="toss-sub" id="tossSubTitle">원하는 상품을 선택해 주세요.</div>
+                  <div id="tossCardsContainer"></div>
+                  <div class="toss-brand-text">이 화면은 신한저축은행 화면입니다</div>
+                </div>
+                <div class="scr__btnwrap">
+                  <button class="scr__cta" id="tossCtaBtn" style="border-radius:14px;">선택하기</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ================= ③ TO-BE 개편안 뷰 ================= -->
+            <div class="device-view" data-view="tobe">
+              <div class="scr">
+                <div class="phone-gnb">
+                  <div class="phone-gnb__title">한도조회 결과</div>
+                  <div class="phone-gnb__action">취소</div>
+                </div>
+
+                <div class="scr__body" id="tobeScrollBody">
+                  <div class="tb-header-wrap">
+                    <div class="tb-main-title">최대 <b>1,800만원</b>까지 신청할 수 있어요</div>
+                    <p class="tb-sub-title" id="tbDynamicSub">원하는 상품을 선택해 주세요.</p>
+                  </div>
+
+                  <div class="g-sec" id="tbPolicySection">
+                    <div class="g-head">
+                      <div class="g-head-main">
+                        <span class="g-title">정책서민금융</span>
+                        <div class="tb-sort-select-wrapper">
+                          <select class="tb-sort-select" id="sortSelect" aria-label="정렬 기준">
+                            <option value="rate">금리 낮은순</option>
+                            <option value="amount">한도 높은순</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="g-cards-wrapper" id="tbPolicyWrapper"></div>
+                  </div>
+
+                  <div class="g-sec" id="tbCreditSection">
+                    <div class="g-head">
+                      <div class="g-head-main"><span class="g-title">신용대출</span></div>
+                      <div class="g-warn-container" id="warnContainer">
+                        <div class="g-warn-msg">사잇돌2+참신한더드림론 선택시 신용대출은 추가로 고를 수 없어요</div>
+                        <button type="button" class="g-unlock-btn" id="btnUnlockCredit">대출 조건 초기화 🔓</button>
+                      </div>
+                    </div>
+                    <div class="g-cards-wrapper" id="tbCreditWrapper"></div>
+                  </div>
+                </div>
+                
+                <div class="scr__btnwrap">
+                  <button type="button" class="tb-quick-chip" id="quickChipTrigger">유리한 조합 한번에 선택</button>
+                  <button class="scr__cta" id="tbCtaBtn" disabled>선택한 상품 신청하기</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 우측 기획 기능 정의서 및 실시간 코멘트 패널 영역 -->
+  <div class="side-panel" style="margin-top: 54px;">
+    
+    <!-- 기능 정의서 영역 -->
+    <div class="info-card">
+      <div class="info-card__title">
+        <span class="info-card__title-text">📋 UI/UX Functional Spec</span>
+        <button type="button" class="btn-sm" id="btnEditDesc">편집 모드</button>
+      </div>
+      <div id="descContainer">
+        <div class="info-card__desc" id="dynamicDescription"></div>
+      </div>
+      <div id="descEditorWrapper" style="display:none;">
+        <textarea class="desc-textarea" id="txDescEditor"></textarea>
+        <div class="desc-btn-wrap">
+          <button type="button" class="btn-sm" id="btnCancelDesc">취소</button>
+          <button type="button" class="btn-sm primary" id="btnSaveDesc">적용하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 실무 커뮤니케이션 코멘트 등록 영역 -->
+    <div class="info-card">
+      <div class="info-card__title">
+        <span class="info-card__title-text">💬 실무자 코멘트 등록 피드</span>
+      </div>
+      <div class="history-form" style="grid-template-columns: 80px 1fr; margin-bottom: 6px;">
+        <input type="text" id="cmtUser" placeholder="이름/직책" />
+        <input type="text" id="cmtText" placeholder="전달 보완 사항이나 피드백을 등록하세요." />
+      </div>
+      <div style="text-align:right; margin-bottom: 8px;">
+        <button type="button" class="btn-sm primary" id="btnAddComment">코멘트 등록</button>
+      </div>
+      <div class="comment-list" id="commentListWrapper"></div>
+    </div>
+
+    <!-- 히스토리 영역 -->
+    <div class="info-card">
+      <div class="info-card__title">
+        <span class="info-card__title-text">🕒 Storyboard Change History</span>
+      </div>
+      <div class="history-form">
+        <select id="formType">
+          <option value="TO-BE">TO-BE</option>
+          <option value="AS-IS">AS-IS</option>
+          <option value="공통">공통</option>
+        </select>
+        <input type="text" id="formUser" placeholder="작성자(기획)" />
+        <input type="text" id="formText" placeholder="수정 보완 내역 기술" />
+      </div>
+      <div style="text-align:right; margin-bottom: 10px;">
+        <button type="button" class="btn-sm primary" id="btnAddHistory">+ 이력 추가</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="history-table" id="historyTable">
+          <thead>
+            <tr>
+              <th style="width:70px;">버전/일자</th>
+              <th style="width:65px;">구분</th>
+              <th>수정 명세 요약</th>
+              <th style="width:80px; text-align:center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const products = [
+    { id:"sunshine", name:"햇살론", rate:5.0, amount:2000, type:"policy", group:"sunshine" },
+    { id:"sunshineSpecial", name:"햇살론특례", rate:12.5, amount:1000, type:"policy", group:"sunshine" },
+    { id:"saidol", name:"사잇돌2", rate:11.8, amount:2300, type:"policy", group:"saidol" },
+    { id:"conflict", name:"사잇돌2 + 참신한더드림론", rate:11.8, amount:2600, type:"policy", group:"saidol", isConflict:true },
+    { id:"creditPure", name:"참신한대출", rate:13.2, amount:390, type:"credit", group:"credit-pure" },
+    { id:"creditExchange", name:"참신한대출(대환)", rate:17.25, amount:500, type:"credit", group:"credit-pure" },
+    { id:"credit500", name:"참신한500", rate:19.0, amount:800, type:"credit", group:"credit-500" }
+  ];
+
+  const cases = {
+    single: ["credit500"],
+    all: ["sunshine", "sunshineSpecial", "saidol", "conflict", "creditPure", "creditExchange"]
+  };
+
+  let historyData = [
+    { id: 1, ver: "v1.0", date: "2026-06-22", type: "TO-BE", user: "기획자", text: "한도조회 결과 v1 기획 마스터 버전 빌드 완료." }
+  ];
+
+  let commentData = [
+    { id: 1, user: "기획자", text: "가로 380px 내에서 메인 한도 타이틀 1줄 보장을 위해 폰트 크기 19.5px, 자간 -0.04em 처리 사양 고정했습니다." },
+    { id: 2, user: "개발 책임", text: "참신한더드림론 결합 케이스 진입 시, 사잇돌2 한도가 차감되어 계산되는 예외 산출 로직 반영 예정입니다." }
+  ];
+
+  let activeCase = 'all';
+  let activeView = 'asis';
+  let globalSelection = {};
+  let isEditMode = false;
+
+  const descriptionMap = {
+    asis: "<strong>[AS-IS 현행 분석 요건]</strong><br>• 상단 최적상품추천 내부 '한번에 신청' 클릭 시 고정 시뮬레이션 그룹값이 매핑됩니다.",
+    toss: "<strong>[벤치마킹 분석]</strong><br>• 피드형 구조로 각 카드 터치 시 배경 면 분할 색상이 활성화됩니다.",
+    tobe: "<strong>[TO-BE 핵심 개편안 검증 요건]</strong><br>• <b>GNB 중앙 정렬 헤더:</b> 상단에 가운데 정렬 타이틀과 취소 액션 버튼 셋을 고정 선언했습니다.<br>• <b>타이틀 통합 보장:</b> 단건/다건 조건에 관계없이 다건 기준의 압축 1줄 타이틀 구조셋을 동일 표출합니다.<br>• <b>최대한도 합산 공식:</b> 햇살론군 한도 MAX + 사잇돌군 한도 MAX + 신용군 한도 MAX 합산 로직을 적용합니다.<br>• <b>차감 예외 규칙 정의:</b> 사잇돌2+참신한더드림론 결합 상품군 진입 시, 더드림론은 사잇돌2 한도가 선차감된 잔여 한도이며 '신용군' 레이어에 귀속 처리됩니다."
+  };
+
+  function updateDynamicDescription() {
+    const descEl = document.getElementById('dynamicDescription');
+    const txEditor = document.getElementById('txDescEditor');
+    if(descEl && !isEditMode) {
+      let suffix = `<br><br><span style='color:var(--c-accent-warn); font-weight:700;'>⚡ 현재 심사 조건: ${activeCase === 'single' ? '1. 단건 노출 모드 (참신한500)' : '2. 다건 복합 노출 모드'}</span>`;
+      descEl.innerHTML = descriptionMap[activeView] + suffix;
+      txEditor.value = descriptionMap[activeView].replace(/<br>/g, "\n");
+    }
+  }
+
+  function renderAllScreens() {
+    const allowedIds = cases[activeCase];
+    const currentProducts = products.filter(p => allowedIds.includes(p.id));
+    const phoneWrapper = document.getElementById('phoneWrapper');
+    const tbSub = document.getElementById('tbDynamicSub');
+    const asTitle = document.getElementById('asMainTitle');
+    const tossSub = document.getElementById('tossSubTitle');
+    
+    const asRecommendZone = document.getElementById('asRecommendZone');
+    const asTabsRow = document.getElementById('asTabsRow');
+    
+    const tbPolicySec = document.getElementById('tbPolicySection');
+    const tbCreditSec = document.getElementById('tbCreditSection');
+    const quickChip = document.getElementById('quickChipTrigger');
+
+    if (activeCase === 'single') {
+      phoneWrapper.classList.add('mode-single');
+      const msg = '원하는 상품을 선택해 주세요.';
+      tbSub.textContent = msg; asTitle.textContent = '신청할 상품을 선택해 주세요.'; tossSub.textContent = '신청할 상품을 선택해 주세요.';
+      asRecommendZone.style.display = 'none';
+      asTabsRow.style.display = 'none';
+      tbPolicySec.classList.add('hide-header');
+      tbCreditSec.classList.add('hide-header');
+      tbPolicySec.style.display = 'none';
+      quickChip.classList.add('is-hidden-btn');
+    } else {
+      phoneWrapper.classList.remove('mode-single');
+      const msg = '원하는 상품을 선택해 주세요.';
+      tbSub.textContent = msg; asTitle.textContent = msg; tossSub.textContent = msg;
+      asRecommendZone.style.display = 'block';
+      asTabsRow.style.display = 'grid';
+      tbPolicySec.classList.remove('hide-header');
+      tbCreditSec.classList.remove('hide-header');
+      tbPolicySec.style.display = 'block';
+    }
+
+    const asSummaryList = document.getElementById('asSummaryList');
+    const asSumTotal = document.getElementById('asSumTotal');
+    asSummaryList.innerHTML = '';
+    let summaryItems = (activeCase === 'all') ? [products.find(p=>p.id==="saidol"), products.find(p=>p.id==="creditPure")] : currentProducts;
+    let totalAmt = 0;
+    summaryItems.forEach(p => {
+      totalAmt += p.amount;
+      asSummaryList.innerHTML += `
+        <div class="as-sum-row">
+          <span class="name">${p.name}</span>
+          <span class="divider-line"></span>
+          <span class="rate">${p.rate}%</span>
+          <span class="val">${p.amount.toLocaleString()}만원</span>
+        </div>`;
+    });
+    asSumTotal.textContent = `${totalAmt.toLocaleString()}만원까지`;
+
+    const asCardsWrap = document.getElementById('asCardsContainer');
+    const tossCardsWrap = document.getElementById('tossCardsContainer');
+    const tbPolicyWrapper = document.getElementById('tbPolicyWrapper');
+    const tbCreditWrapper = document.getElementById('tbCreditWrapper');
+    
+    asCardsWrap.innerHTML = ''; tossCardsWrap.innerHTML = '';
+    tbPolicyWrapper.innerHTML = ''; tbCreditWrapper.innerHTML = '';
+
+    currentProducts.forEach(p => {
+      const isSel = globalSelection[p.id] ? 'sel' : '';
+      
+      asCardsWrap.innerHTML += `
+        <div class="as-card ${isSel}" data-id="${p.id}" id="target-as-${p.id}">
+          <div class="as-cardname">${p.name}</div>
+          <div class="as-cardmeta"><span class="lbl">금리</span> <b>${p.rate}%</b> &nbsp;&nbsp; <span class="lbl">최대</span> <b>${p.amount.toLocaleString()}만원</b></div>
+          <span class="as-circle"></span>
+        </div>`;
+
+      tossCardsWrap.innerHTML += `
+        <div class="toss-card ${isSel}" data-id="${p.id}" id="target-toss-${p.id}">
+          <div class="toss-cname">${p.name}</div>
+          <div class="toss-cfig">${p.rate}%<span>·</span>${p.amount.toLocaleString()}만원</div>
+        </div>`;
+
+      let badgeHtml = p.id === 'conflict' ? `<div class="tb-new-badge">NEW</div>` : '';
+      let hasBadgeClass = p.id === 'conflict' ? 'has-badge' : '';
+
+      const tobeCardHtml = `
+        <div class="as-card ${isSel} ${hasBadgeClass}" data-type="${p.type}-card" data-group="${p.group}" data-id="${p.id}" data-rate="${p.rate}" data-amount="${p.amount}" id="target-tb-${p.id}">
+          ${badgeHtml}
+          <div class="as-cardname">${p.name}</div>
+          <div class="as-cardmeta"><span class="lbl">금리</span> <b style="color:var(--c-primary); font-size:13px;">연 ${p.rate}%</b> &nbsp;&nbsp; <span class="lbl">한도</span> <b>최대 ${p.amount.toLocaleString()}만원</b></div>
+          <span class="g-pick-marker"></span>
+        </div>`;
+
+      if(p.type === 'policy') tbPolicyWrapper.innerHTML += tobeCardHtml;
+      else tbCreditWrapper.innerHTML += tobeCardHtml;
+    });
+
+    bindCoreEvents();
+    syncCtaButtons();
+    executeSortLogic();
+    updateDynamicDescription();
+  }
+
+  function bindCoreEvents() {
+    function toggleProductSelection(id) {
+      const p = products.find(prod => prod.id === id);
+      const targetState = !globalSelection[id];
+
+      if (targetState) {
+        products.forEach(prod => {
+          if (prod.group === p.group && prod.id !== id) {
+            globalSelection[prod.id] = false;
+          }
+        });
+        globalSelection[id] = true;
+      } else {
+        globalSelection[id] = false;
+      }
+
+      if (activeCase === 'all' && globalSelection['conflict']) {
+        globalSelection['creditPure'] = false;
+        globalSelection['creditExchange'] = false;
+      }
+      renderAllScreens();
+    }
+
+    document.querySelectorAll('.device-view[data-view="asis"] .as-card').forEach(card => {
+      card.addEventListener('click', () => toggleProductSelection(card.dataset.id));
+    });
+    document.querySelectorAll('.toss-card').forEach(card => {
+      card.addEventListener('click', () => toggleProductSelection(card.dataset.id));
+    });
+    document.querySelectorAll('.device-view[data-view="tobe"] .as-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const creditWrapper = document.getElementById('tbCreditWrapper');
+        if(card.closest('#tbCreditWrapper') && creditWrapper.classList.contains('blocked-zone')) {
+          e.stopPropagation(); return;
+        }
+        toggleProductSelection(card.dataset.id);
+      });
+    });
+  }
+
+  function syncCtaButtons() {
+    const selectedIds = Object.keys(globalSelection).filter(key => globalSelection[key]);
+    const cnt = selectedIds.length;
+    
+    document.getElementById('asCtaBtn').classList.toggle('is-ready', cnt > 0);
+    document.getElementById('asCtaBtn').textContent = cnt > 0 ? '대출 신청하기' : '상품 선택';
+    document.getElementById('tossCtaBtn').classList.toggle('is-ready', cnt > 0);
+    
+    const tbCta = document.getElementById('tbCtaBtn');
+    const creditWrapper = document.getElementById('tbCreditWrapper');
+    const warnContainer = document.getElementById('warnContainer');
+    const quickChip = document.getElementById('quickChipTrigger');
+
+    if (globalSelection['conflict'] && activeCase === 'all') {
+      creditWrapper.classList.add('blocked-zone');
+      warnContainer.style.display = 'block';
+    } else {
+      creditWrapper.classList.remove('blocked-zone');
+      warnContainer.style.display = 'none';
+    }
+
+    if (activeCase === 'single' || cnt > 0) {
+      quickChip.classList.add('is-hidden-btn');
+    } else {
+      quickChip.classList.remove('is-hidden-btn');
+    }
+
+    if (cnt === 0) {
+      tbCta.disabled = true;
+      tbCta.classList.remove('is-ready');
+      tbCta.textContent = '선택한 상품 신청하기';
+    } else {
+      tbCta.disabled = false;
+      tbCta.classList.add('is-ready');
+      let sumAmt = 0;
+      selectedIds.forEach(id => {
+        const prod = products.find(p => p.id === id);
+        if(prod) sumAmt += prod.amount;
+      });
+      tbCta.textContent = `선택한 ${cnt}개 상품 신청하기 (총 ${sumAmt.toLocaleString()}만원)`;
+    }
+  }
+
+  function executeSortLogic() {
+    const sortSelect = document.getElementById('sortSelect');
+    if (!sortSelect || activeCase === 'single' || activeView !== 'tobe') return;
+
+    const sortType = sortSelect.value;
+    const sortContainer = (wrapperElement) => {
+      const cards = Array.from(wrapperElement.querySelectorAll('.as-card'));
+      if (cards.length === 0) return;
+      cards.sort((a, b) => {
+        if (sortType === 'rate') {
+          return parseFloat(a.dataset.rate) - parseFloat(b.dataset.rate);
+        } else {
+          return parseInt(b.dataset.amount) - parseInt(a.dataset.amount);
+        }
+      });
+      cards.forEach(card => wrapperElement.appendChild(card));
+    };
+
+    sortContainer(document.getElementById('tbPolicyWrapper'));
+    sortContainer(document.getElementById('tbCreditWrapper'));
+  }
+
+  document.getElementById('sortSelect').addEventListener('change', executeSortLogic);
+
+  const viewSelector = document.getElementById('viewSelector');
+  const caps = { asis: 'AS-IS 현행 화면 모드', toss: '토스 참고 벤치마킹 모드', tobe: 'TO-BE 개편안 검증 모드' };
+  
+  if(viewSelector) {
+    viewSelector.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        viewSelector.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeView = btn.dataset.view;
+        document.getElementById('cap').textContent = caps[activeView];
+        document.querySelectorAll('.phone .device-view').forEach(view => {
+          view.classList.toggle('is-active', view.dataset.view === activeView);
+        });
+        renderAllScreens();
+      });
+    });
+  }
+
+  const conditionSelector = document.getElementById('conditionSelector');
+  if(conditionSelector) {
+    conditionSelector.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        conditionSelector.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCase = btn.dataset.cond;
+        globalSelection = {};
+        renderAllScreens();
+      });
+    });
+  }
+
+  document.getElementById('btnUnlockCredit').addEventListener('click', (e) => {
+    e.stopPropagation();
+    globalSelection['conflict'] = false;
+    renderAllScreens();
+  });
+
+  // 디스크립션 에디터
+  const btnEditDesc = document.getElementById('btnEditDesc');
+  const descContainer = document.getElementById('descContainer');
+  const descEditorWrapper = document.getElementById('descEditorWrapper');
+  const txDescEditor = document.getElementById('txDescEditor');
+  const btnCancelDesc = document.getElementById('btnCancelDesc');
+  const btnSaveDesc = document.getElementById('btnSaveDesc');
+
+  btnEditDesc.addEventListener('click', () => {
+    isEditMode = true;
+    descContainer.style.display = 'none';
+    descEditorWrapper.style.display = 'block';
+    btnEditDesc.style.display = 'none';
+  });
+
+  btnCancelDesc.addEventListener('click', () => {
+    isEditMode = false;
+    descContainer.style.display = 'block';
+    descEditorWrapper.style.display = 'none';
+    btnEditDesc.style.display = 'inline-block';
+    updateDynamicDescription();
+  });
+
+  btnSaveDesc.addEventListener('click', () => {
+    isEditMode = false;
+    descriptionMap[activeView] = txDescEditor.value.replace(/\n/g, "<br>");
+    descContainer.style.display = 'block';
+    descEditorWrapper.style.display = 'none';
+    btnEditDesc.style.display = 'inline-block';
+    updateDynamicDescription();
+  });
+
+  // 코멘트 매니저
+  const commentListWrapper = document.getElementById('commentListWrapper');
+  const btnAddComment = document.getElementById('btnAddComment');
+
+  function renderCommentList() {
+    commentListWrapper.innerHTML = '';
+    if(commentData.length === 0) {
+      commentListWrapper.innerHTML = '<div style="font-size:11.5px; color:var(--c-text-muted); text-align:center; padding:10px;">등록된 코멘트가 없습니다.</div>';
+      return;
+    }
+    commentData.forEach(item => {
+      commentListWrapper.innerHTML += `
+        <div class="comment-item" id="cmt-item-${item.id}">
+          <div class="comment-meta">
+            <span>👤 ${item.user}</span>
+            <span class="comment-del" onclick="window.deleteCommentRow(${item.id})">삭제 ✕</span>
+          </div>
+          <div>${item.text}</div>
+        </div>
+      `;
+    });
+  }
+
+  btnAddComment.addEventListener('click', () => {
+    const user = document.getElementById('cmtUser').value.trim() || "기획자";
+    const text = document.getElementById('cmtText').value.trim();
+    if(!text) return;
+
+    commentData.unshift({ id: Date.now(), user: user, text: text });
+    document.getElementById('cmtText').value = '';
+    renderCommentList();
+  });
+
+  window.deleteCommentRow = function(id) {
+    commentData = commentData.filter(item => item.id !== id);
+    renderCommentList();
+  };
+
+  // 히스토리 매니저
+  const historyTbody = document.getElementById('historyTbody');
+  const btnAddHistory = document.getElementById('btnAddHistory');
+
+  function renderHistoryTable() {
+    historyTbody.innerHTML = '';
+    historyData.forEach((item) => {
+      const badgeClass = item.type === 'TO-BE' ? 'badge-v tobe' : 'badge-v';
+      historyTbody.innerHTML += `
+        <tr id="hist-row-${item.id}">
+          <td><strong>${item.ver}</strong><br><small style="color:var(--c-text-muted);">${item.date}</small></td>
+          <td><span class="${badgeClass}">${item.type}</span><br><small style="font-weight:700; color:var(--c-primary);">${item.user}</small></td>
+          <td>
+            <div class="view-text" id="hist-text-view-${item.id}">${item.text}</div>
+            <input type="text" class="edit-input" id="hist-input-edit-${item.id}" value="${item.text}" style="display:none; width:100%; border:1px solid var(--c-primary); padding:4px; font-size:11px;" />
+          </td>
+          <td style="text-align:center;">
+            <div id="hist-btn-group-view-${item.id}">
+              <button type="button" class="btn-sm" onclick="window.editHistoryRow(${item.id})" style="padding:2px 5px; font-size:10px; margin-bottom:2px;">수정</button>
+              <button type="button" class="btn-sm danger" onclick="window.deleteHistoryRow(${item.id})" style="padding:2px 5px; font-size:10px;">삭제</button>
+            </div>
+            <div id="hist-btn-group-edit-${item.id}" style="display:none;">
+              <button type="button" class="btn-sm primary" onclick="window.saveHistoryRow(${item.id})" style="padding:2px 5px; font-size:10px; margin-bottom:2px;">완료</button>
+              <button type="button" class="btn-sm" onclick="window.cancelEditRow(${item.id})" style="padding:2px 5px; font-size:10px;">취소</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  btnAddHistory.addEventListener('click', () => {
+    const type = document.getElementById('formType').value;
+    const user = document.getElementById('formUser').value.trim() || "기획";
+    const text = document.getElementById('formText').value.trim();
+    
+    if(!text) return;
+    const today = new Date().toISOString().split('T')[0];
+    let nextVer = "v1.1";
+    if(historyData.length > 0) {
+      const lastVerNum = parseFloat(historyData[0].ver.replace('v', ''));
+      if(!isNaN(lastVerNum)) nextVer = "v" + (lastVerNum + 0.1).toFixed(1);
+    }
+
+    historyData.unshift({ id: Date.now(), ver: nextVer, date: today, type: type, user: user, text: text });
+    document.getElementById('formText').value = '';
+    renderHistoryTable();
+  });
+
+  window.deleteHistoryRow = function(id) {
+    if(confirm("이력을 삭제하시겠습니까?")) {
+      historyData = historyData.filter(item => item.id !== id);
+      renderHistoryTable();
+    }
+  };
+
+  window.editHistoryRow = function(id) {
+    document.getElementById(`hist-text-view-${id}`).style.display = 'none';
+    document.getElementById(`hist-input-edit-${id}`).style.display = 'block';
+    document.getElementById(`hist-btn-group-view-${id}`).style.display = 'none';
+    document.getElementById(`hist-btn-group-edit-${id}`).style.display = 'block';
+  };
+
+  window.cancelEditRow = function(id) {
+    document.getElementById(`hist-text-view-${id}`).style.display = 'block';
+    document.getElementById(`hist-input-edit-${id}`).style.display = 'none';
+    document.getElementById(`hist-btn-group-view-${id}`).style.display = 'block';
+    document.getElementById(`hist-btn-group-edit-${id}`).style.display = 'none';
+  };
+
+  window.saveHistoryRow = function(id) {
+    const editVal = document.getElementById(`hist-input-edit-${id}`).value.trim();
+    if(!editVal) return;
+    const item = historyData.find(h => h.id === id);
+    if(item) item.text = editVal;
+    renderHistoryTable();
+  };
+
+  renderCommentList();
+  renderHistoryTable();
+  renderAllScreens();
+})();
+</script>
+</body>
+</html>
