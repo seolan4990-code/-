@@ -27,7 +27,7 @@
 
   .stage{background:var(--c-stage);border:1px solid var(--c-line);border-radius:18px;padding:16px;margin-bottom:20px;}
   
-  /* 제어 패널 왼쪽 정렬 반영 */
+  /* 외각 제어 패널 왼쪽 정렬 */
   .control-panel{display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:16px; background:#fff; padding:14px; border-radius:12px; border:1px solid var(--c-line);}
   .control-row{display:flex; align-items:center; gap:10px; width:100%; justify-content:flex-start; flex-wrap:wrap;}
   .control-label{font-size:12px; font-weight:800; color:var(--c-text-sub); min-width:80px;}
@@ -338,8 +338,8 @@
                         <span class="g-title">정책서민금융</span>
                         <div class="tb-sort-select-wrapper">
                           <select class="tb-sort-select" id="sortSelect" aria-label="정렬 기준">
-                            <option value="rate">금리 낮은순</option>
-                            <option value="amount">한도 높은순</option>
+                            <option value="rate">금리순</option>
+                            <option value="amount">한도순</option>
                           </select>
                         </div>
                       </div>
@@ -351,8 +351,8 @@
                     <div class="g-head">
                       <div class="g-head-main"><span class="g-title">신용대출</span></div>
                       <div class="g-warn-container" id="warnContainer">
-                        <div class="g-warn-msg">사잇돌2+참신한더드림론 선택시 신용대출은 추가로 고를 수 없어요</div>
-                        <button type="button" class="g-unlock-btn" id="btnUnlockCredit">대출 조건 초기화 🔓</button>
+                        <div class="g-warn-msg">사잇돌2+참신한더드림론 선택시 신용대출은 추가로 고를 수 없어요.</div>
+                        <button type="button" class="g-unlock-btn" id="btnUnlockCredit">대출 조건 초기화</button>
                       </div>
                     </div>
                     <div class="g-cards-wrapper" id="tbCreditWrapper"></div>
@@ -360,7 +360,7 @@
                 </div>
                 
                 <div class="scr__btnwrap">
-                  <button type="button" class="tb-quick-chip" id="quickChipTrigger">유리한 조합 한번에 선택</button>
+                  <button type="button" class="tb-quick-chip" id="quickChipTrigger">추천상품 한번에 신청</button>
                   <button class="scr__cta" id="tbCtaBtn" disabled>선택한 상품 신청하기</button>
                 </div>
               </div>
@@ -442,12 +442,12 @@
 <script>
 (function(){
   const products = [
-    { id:"sunshine", name:"햇살론", rate:5.0, amount:2000, type:"policy", group:"sunshine" },
+    { id:"sunshine", name:"햇살론", rate:9.8, amount:2000, type:"policy", group:"sunshine" },
     { id:"sunshineSpecial", name:"햇살론특례", rate:12.5, amount:1000, type:"policy", group:"sunshine" },
     { id:"saidol", name:"사잇돌2", rate:11.8, amount:2300, type:"policy", group:"saidol" },
     { id:"conflict", name:"사잇돌2 + 참신한더드림론", rate:11.8, amount:2600, type:"policy", group:"saidol", isConflict:true },
-    { id:"creditPure", name:"참신한대출", rate:13.2, amount:390, type:"credit", group:"credit-pure" },
-    { id:"creditExchange", name:"참신한대출(대환)", rate:17.25, amount:500, type:"credit", group:"credit-pure" },
+    { id:"creditPure", name:"참신한대출", rate:17.25, amount:390, type:"credit", group:"credit-pure" },
+    { id:"creditExchange", name:"참신한대출(대환)", rate:17.25, amount:5000, type:"credit", group:"credit-pure" },
     { id:"credit500", name:"참신한500", rate:19.0, amount:800, type:"credit", group:"credit-500" }
   ];
 
@@ -457,12 +457,12 @@
   };
 
   const defaultHistory = [
-    { id: 1, ver: "v1.0", date: "2026-06-22", type: "TO-BE", user: "기획자", text: "한도조회 결과 v1 기획 마스터 버전 빌드 완료." }
+    { id: 1, ver: "v1.0", date: "2026-06-22", type: "TO-BE", user: "라니대리", text: "한도조회 결과 v1 기획서 마스터 깃허프에서 버전 빌드 완료." }
   ];
 
   const defaultComments = [
-    { id: 1, user: "기획자", text: "가로 380px 내에서 메인 한도 타이틀 1줄 보장을 위해 폰트 크기 19.5px, 자간 -0.04em 처리 사양 고정했습니다." },
-    { id: 2, user: "개발 책임", text: "참신한더드림론 결합 케이스 진입 시, 사잇돌2 한도가 차감되어 계산되는 예외 산출 로직 반영 예정입니다." }
+    { id: 1, user: "라니프로", text: "가로 380px 세로아주길게 했습니다.ㅎㅎ." },
+    { id: 2, user: "라니대리", text: "참신한더드림론 결합 케이스 진입 시, 사잇돌2 한도가 차감되어 계산되는 예외 산출 로직 반영 예정입니다." }
   ];
 
   const defaultDescriptions = {
@@ -484,7 +484,7 @@
     const descEl = document.getElementById('dynamicDescription');
     const txEditor = document.getElementById('txDescEditor');
     if(descEl && !isEditMode) {
-      let suffix = `<br><br><span style='color:var(--c-accent-warn); font-weight:700;'>⚡ 현재 심사 조건: ${activeCase === 'single' ? '1. 단건 노출 모드 (참신한500)' : '2. 다건 복합 노출 모드'}</span>`;
+      let suffix = `<br><br><span style='color:var(--c-accent-warn); font-weight:700;'>⚡현재 심사 조건: ${activeCase === 'single' ? '1. 단건 노출 모드 (참신한500)' : '2. 다건 복합 노출 모드'}</span>`;
       descEl.innerHTML = descriptionMap[activeView] + suffix;
       txEditor.value = descriptionMap[activeView].replace(/<br>/g, "\n");
     }
@@ -695,8 +695,32 @@
 
   document.getElementById('sortSelect').addEventListener('change', executeSortLogic);
 
+  document.getElementById('asQuickBtn').addEventListener('click', () => {
+    globalSelection = {};
+    if (activeCase === 'all') {
+      globalSelection['saidol'] = true;
+      globalSelection['creditPure'] = true;
+      renderAllScreens();
+    } else {
+      globalSelection['credit500'] = true;
+      renderAllScreens();
+    }
+  });
+
+  // ⭐️ 하단 '최적상품추천조합 한번에 선택' 버튼 클릭 이벤트 교정 완료
+  document.getElementById('quickChipTrigger').addEventListener('click', (e) => {
+    e.stopPropagation();
+    globalSelection = {};
+    if(activeCase === 'all') {
+      globalSelection['sunshine'] = true;
+      globalSelection['saidol'] = true;
+      globalSelection['creditPure'] = true;
+      renderAllScreens();
+    }
+  });
+
   const viewSelector = document.getElementById('viewSelector');
-  const caps = { asis: 'AS-IS 현행 화면 모드', toss: '토스 참고 벤치마킹 모드', tobe: 'TO-BE 개편안 검증 모드' };
+  const caps = { asis: 'AS-IS 현행 화면 모드', toss: '토스웹뷰토모드', tobe: 'TO-BE 개편안 검증 모드' };
   
   if(viewSelector) {
     viewSelector.querySelectorAll('button').forEach(btn => {
@@ -884,7 +908,7 @@
   };
 
   document.getElementById('btnClearStorage').addEventListener('click', () => {
-    if(confirm("시뮬레이터에 누적된 실무자 코멘트 및 변경 이력을 전면 청소하고 초기 마스터 값으로 리셋하시겠습니까?")) {
+    if(confirm("등록건 모두 초기화해드릴까요??")) {
       localStorage.removeItem('sh_history');
       localStorage.removeItem('sh_comments');
       localStorage.removeItem('sh_descriptions');
