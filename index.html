@@ -1,925 +1,809 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>한도조회 결과 v1</title>
-<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>모바일화면 개선 · 변경후화면 퍼블리싱 핸드오프</title>
 <style>
   :root{
-    --c-primary:#2B5CE6;
-    --c-accent-warn:#E8821A; --c-tobe:#15A06B;
-    --c-text:#161B2E; --c-text-sub:#5B6377; --c-text-muted:#9298A8;
-    --c-line:#EAEDF3; --c-bg:#EEF1F7; --c-surface:#FFFFFF; --c-badge-bg:#F0F2F7;
-    --c-stage:#F7F8FC;
-    --font-base:"Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    /* 문서 크롬(중립) */
+    --ink:#12151C; --ink-2:#3B424E; --ink-3:#6B7280; --ink-4:#9AA1AD;
+    --paper:#FBFCFE; --panel:#FFFFFF; --hair:#E7EAF0; --hair-2:#EFF1F5;
+    --code-bg:#0E1320; --code-fg:#D8DFEE; --code-dim:#7C88A8; --code-key:#8FB4FF; --code-str:#9BE0A8;
+    /* 제품 토큰(참조용) */
+    --p-primary:#2B5CE6;
+    --mono:"SFMono-Regular",ui-monospace,"JetBrains Mono","Menlo",monospace;
+    --sans:"Noto Sans KR","Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   }
-  *{box-sizing:border-box;} html,body{margin:0; padding:0;}
-  body{font-family:var(--font-base);color:var(--c-text);background:var(--c-bg);-webkit-font-smoothing:antialiased; padding:20px;}
-
-  .main-layout { display: grid; grid-template-columns: 1fr 460px; gap: 20px; max-width: 1600px; margin: 0 auto; }
-  @media(max-width: 1040px){ .main-layout { grid-template-columns: 1fr; } }
-
-  .head{margin-bottom:16px; border-bottom: 2px solid var(--c-line); padding-bottom: 10px; text-align: left;}
-  .head__title{font-size:24px; font-weight:850; letter-spacing:-.02em; color: var(--c-text); margin: 0 0 4px 0;}
-  .head__sub{font-size:13px; color:var(--c-text-sub); font-weight: 500;}
-
-  .stage{background:var(--c-stage);border:1px solid var(--c-line);border-radius:18px;padding:16px;margin-bottom:20px;}
-  
-  /* 외각 제어 패널 왼쪽 정렬 */
-  .control-panel{display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:16px; background:#fff; padding:14px; border-radius:12px; border:1px solid var(--c-line);}
-  .control-row{display:flex; align-items:center; gap:10px; width:100%; justify-content:flex-start; flex-wrap:wrap;}
-  .control-label{font-size:12px; font-weight:800; color:var(--c-text-sub); min-width:80px;}
-  
-  .view-selector, .condition-selector{display:inline-flex; background:#EDEFF4; border-radius:8px; padding:3px; gap:2px;}
-  .view-selector button, .condition-selector button{border:0; background:none; font-family:inherit; font-size:11px; font-weight:700; padding:5px 12px; border-radius:6px; color:var(--c-text-muted); cursor:pointer;}
-  .view-selector button.active, .condition-selector button.active{background:#fff; color:var(--c-text); box-shadow:0 1px 3px rgba(0,0,0,0.08); font-weight:800;}
-  .view-selector button.active { color:var(--c-primary); }
-  .condition-selector button.active{color:#E8821A; border:0.5px solid #F3DCBE;}
-
-  .stagecap{text-align:left; font-size:11.5px; color:var(--c-text-muted); margin:4px 0 12px 2px; min-height:16px; font-weight:600;}
-
-  .deck{display:flex; justify-content:center; width:100%; min-height:820px;}
-  .phone{width:380px; height:800px; background:#0C0F15; border-radius:40px; padding:12px; box-shadow:0 20px 40px -10px rgba(20,28,48,.2); position:relative;}
-  .phone__screen{background:#fff; border-radius:30px; overflow:hidden; height:100%; position:relative; display:flex; flex-direction:column;}
-  .phone__bar{height:20px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;}
-  .phone__bar::after{content:""; width:90px; height:4px; border-radius:999px; background:#E4E7EE;}
-  
-  .device-view{display:none; flex:1; overflow:hidden; flex-direction:column;}
-  .device-view.is-active{display:flex;}
-  
-  .scr{flex:1; overflow:hidden; display:flex; flex-direction:column;}
-  
-  .phone-gnb {
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background: #fff;
-    border-bottom: 1px solid var(--c-line);
-    flex: 0 0 auto;
-    padding: 0 16px;
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); -webkit-font-smoothing:antialiased;
+    line-height:1.6; font-size:15px;
   }
-  .phone-gnb__title {
-    font-size: 15.5px;
-    font-weight: 700;
-    color: #161B2E;
-    letter-spacing: -0.01em;
+  a{color:var(--p-primary); text-decoration:none;}
+  code{font-family:var(--mono); font-size:.86em; background:var(--hair-2); padding:1px 6px; border-radius:5px; color:#2A3242;}
+
+  /* 레이아웃 */
+  .wrap{display:grid; grid-template-columns:248px minmax(0,1fr); max-width:1240px; margin:0 auto; align-items:start;}
+  .toc{
+    position:sticky; top:0; height:100vh; overflow-y:auto; padding:34px 20px 40px;
+    border-right:1px solid var(--hair); font-size:13.5px;
   }
-  .phone-gnb__action {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    color: var(--c-text-sub);
-    font-weight: 500;
-    cursor: pointer;
-  }
+  .toc .brand{font-weight:800; font-size:14px; letter-spacing:-.02em; color:var(--ink); margin-bottom:2px;}
+  .toc .brand small{display:block; font-weight:600; font-size:11px; color:var(--ink-4); letter-spacing:.02em; margin-top:5px;}
+  .toc nav{margin-top:24px; display:flex; flex-direction:column; gap:1px;}
+  .toc .grp{font-size:10.5px; font-weight:800; letter-spacing:.08em; color:var(--ink-4); text-transform:uppercase; margin:18px 0 6px 8px;}
+  .toc a{display:block; padding:6px 10px; border-radius:7px; color:var(--ink-2); font-weight:500;}
+  .toc a:hover{background:var(--hair-2); color:var(--ink);}
+  main{padding:56px 52px 120px; min-width:0;}
 
-  .scr__body{flex:1; overflow:auto; padding:16px 16px 0; scroll-behavior: smooth;}
-  .scr__body::-webkit-scrollbar{width:0;}
-  
-  .scr__btnwrap{padding:12px 16px 16px; display:flex; flex-direction:column; gap:8px; background:#fff; border-top:1px solid var(--c-line);}
-  .scr__cta{width:100%; border:0; cursor:pointer; background:#CBD0DC; color:#fff; font-family:inherit;font-size:14.5px;font-weight:700;padding:15px;border-radius:14px; text-align:center; transition: all 0.15s; letter-spacing:-0.02em;}
-  .scr__cta.is-ready{background:var(--c-primary); color:#fff; cursor:pointer;}
-  .scr__cta.asis-style{background:#CBD0DC; color:#fff;}
-  .scr__cta.asis-style.is-ready{background:#1D57DF;}
-  
-  .tb-quick-chip{display:flex; width:100%; height:48px; align-items:center; justify-content:center; background:var(--c-surface); border-radius:14px; border:1px solid var(--c-primary); font-size:14px; font-weight:700; color:var(--c-primary); cursor:pointer; transition:all 0.15s; box-shadow: 0 2px 6px rgba(43,92,230,0.06);}
-  .tb-quick-chip.is-hidden-btn { display:none !important; }
+  /* 헤더 */
+  .hero{border-bottom:1px solid var(--hair); padding-bottom:30px; margin-bottom:14px;}
+  .eyebrow{font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--p-primary);}
+  .hero h1{font-size:31px; font-weight:800; letter-spacing:-.03em; margin:12px 0 6px; line-height:1.2;}
+  .hero p{color:var(--ink-3); font-size:14.5px; margin:0; max-width:640px;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px;}
+  .chip{font-size:12px; font-weight:600; color:var(--ink-2); background:var(--panel); border:1px solid var(--hair); padding:5px 11px; border-radius:999px;}
+  .chip b{color:var(--ink); font-weight:800;}
 
-  .side-panel { display: flex; flex-direction: column; gap: 16px; }
-  .info-card { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 14px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.015); text-align: left;}
-  .info-card__title { font-size: 14px; font-weight: 800; color: var(--c-text); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--c-line); padding-bottom: 6px;}
-  .info-card__title-text { display: flex; align-items: center; gap: 4px; }
-  .info-card__desc { font-size: 12.5px; color: var(--c-text-sub); line-height: 1.55; word-break: keep-all; text-align: left;}
-  
-  .desc-textarea { width: 100%; height: 110px; border: 1px solid var(--c-line); border-radius: 6px; padding: 8px; font-family: inherit; font-size: 12px; resize: none; margin-bottom: 6px; color: var(--c-text); line-height: 1.4; text-align: left;}
-  .desc-btn-wrap { display: flex; justify-content: flex-end; gap: 4px; }
-  
-  .btn-sm { padding: 4px 8px; font-size: 11px; font-weight: 700; border-radius: 5px; cursor: pointer; border: 1px solid var(--c-line); background: #fff; color: var(--c-text-sub); }
-  .btn-sm.primary { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
-  .btn-sm.danger { background: #FDE8E8; color: #E02424; border-color: #F8B4B4; }
+  section{padding-top:52px; scroll-margin-top:24px;}
+  h2{font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-4); margin:0 0 4px;}
+  h2 + .h2sub{font-size:23px; font-weight:800; letter-spacing:-.025em; color:var(--ink); margin:0 0 22px; line-height:1.25;}
+  h3{font-size:16.5px; font-weight:800; letter-spacing:-.02em; margin:34px 0 12px; padding-left:11px; border-left:3px solid var(--p-primary);}
+  h4{font-size:14px; font-weight:800; margin:22px 0 10px; color:var(--ink);}
+  p.lead{color:var(--ink-2); max-width:680px;}
 
-  .comment-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 180px; overflow-y: auto; text-align: left;}
-  .comment-item { background: var(--c-stage); padding: 8px; border-radius: 6px; border: 1px solid var(--c-line); font-size: 11.5px; line-height: 1.4; position: relative;}
-  .comment-meta { display: flex; justify-content: space-between; font-weight: 700; color: var(--c-primary); margin-bottom: 2px; font-size: 10.5px; }
-  .comment-del { color: #E02424; cursor: pointer; font-weight: 800; font-size: 10px; margin-left: auto;}
+  .panel{background:var(--panel); border:1px solid var(--hair); border-radius:14px; padding:22px 24px; margin:16px 0;}
+  .note{background:#F4F7FF; border:1px solid #DCE6FF; border-radius:12px; padding:13px 16px; font-size:13.5px; color:#254190; margin:14px 0;}
+  .note b{font-weight:800;}
+  .warn{background:#FFF7ED; border:1px solid #FCE3C2; color:#8A5314;}
 
-  .history-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; margin-top: 6px;}
-  .history-table th, .history-table td { padding: 6px; border-bottom: 1px solid var(--c-line); }
-  .history-table th { background: var(--c-stage); font-weight: 700; color: var(--c-text-sub); }
-  .history-table td { color: var(--c-text); vertical-align: middle; text-align: left;}
-  .badge-v { display: inline-block; padding: 1px 4px; font-size: 9.5px; font-weight: 700; background: var(--c-badge-bg); color: var(--c-text-sub); border-radius: 3px; }
-  .badge-v.tobe { background: #E6F7ED; color: var(--c-tobe); }
-  
-  .history-form { display: grid; grid-template-columns: 75px 65px 1fr; gap: 4px; margin-bottom: 8px; padding: 8px; background: var(--c-stage); border-radius: 6px; border: 1px solid var(--c-line); text-align: left;}
-  .history-form input, .history-form select { border: 1px solid var(--c-line); padding: 4px; font-size: 11px; border-radius: 4px; font-family: inherit; text-align: left;}
+  /* 테이블 */
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px;}
+  th,td{text-align:left; padding:11px 13px; border-bottom:1px solid var(--hair-2);}
+  th{font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-4); border-bottom:1px solid var(--hair);}
+  td{color:var(--ink-2); vertical-align:top;}
+  td b{color:var(--ink);}
+  tr:last-child td{border-bottom:none;}
+  .mono{font-family:var(--mono); font-size:12.5px;}
+  .badge-new{display:inline-block; background:#DCFCE7; color:#15803D; font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:999px; vertical-align:middle;}
+  .badge-reco{display:inline-block; background:#DBEAFE; color:#1D4ED8; font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:999px; vertical-align:middle;}
+  .badge-life{display:inline-block; background:#FEF3C7; color:#B45309; font-size:9.5px; font-weight:800; padding:2px 7px; border-radius:999px; vertical-align:middle;}
 
-  /* ===== 모바일 내부 레이아웃 ===== */
-  .as-recommend-zone { display:block; }
-  .as-top-indicator { display:flex; align-items:center; gap:4px; font-size:14px; font-weight:800; color:#161B2E; margin:2px 0 8px; }
-  .as-star { color:#E8821A; font-size:15px; }
-  
-  .as-summary-box{border:1.2px solid #E6E8EF; border-radius:14px; padding:14px; margin-bottom:14px; background:#fff;}
-  .as-summary-box .as-sum-headline { font-size:15px; font-weight:800; color:#161B2E; margin-bottom:10px; letter-spacing:-0.02em; }
-  
-  .as-summary-box .as-sum-row{display:flex; align-items:center; font-size:12.5px; margin-bottom:8px; padding-bottom:2px;}
-  .as-summary-box .as-sum-row .name{font-weight:500; color:var(--c-text-sub); width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .as-summary-box .as-sum-row .divider-line { width:1px; height:10px; background:#E4E7EE; margin:0 10px; }
-  .as-summary-box .as-sum-row .rate{color:var(--c-text-sub); font-weight:500;}
-  .as-summary-box .as-sum-row .val{font-weight:800; color:#1D57DF; margin-left:auto;}
-  
-  .as-quick-btn{width:100%; border:0; background:#1D57DF; color:#fff; font-size:13.5px; font-weight:700; padding:10px; border-radius:8px; margin-top:6px; cursor:pointer;}
-  
-  .as-title-label{font-size:13.5px; font-weight:700; margin:12px 0 8px; color:#161B2E;}
-  .as-tabs{display:grid; grid-template-columns:1fr 1fr; background:#EDEFF4; border-radius:8px; padding:2px; margin-bottom:12px;}
-  .as-tabs button{border:0; background:none; font-family:inherit; font-size:12px; font-weight:700; padding:6px; color:var(--c-text-muted); cursor:pointer;}
-  .as-tabs button.on{background:#fff; color:#161B2E; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.05);}
+  /* 매핑 워크시트 입력 셀 */
+  th.fill-h{color:#1E3FA3;}
+  td.fill{background:#FCFDFF; border-left:1px dashed #C9D2E6; min-width:150px; cursor:text; font-family:var(--mono); font-size:12.5px; color:#2A3242;}
+  td.fill:empty::before{content:"— 입력 —"; color:#BCC3D2; font-family:var(--mono); font-size:11.5px;}
+  td.fill:focus{outline:2px solid #B8CAFF; outline-offset:-2px; background:#fff;}
+  @media print{ td.fill{background:#fff;} td.fill:empty::before{content:"";} }
 
-  .as-card{border:1.2px solid #E6E8EF; border-radius:16px; padding:16px; margin-bottom:10px; background:#fff; position:relative; cursor:pointer;}
-  .as-cardname{font-size:14px; font-weight:800; color:#161B2E; margin-bottom:6px; letter-spacing:-0.01em; text-align:left;}
-  .as-cardmeta{display:flex; font-size:12.5px; color:var(--c-text-sub); font-weight:500;}
-  .as-cardmeta b{color:var(--c-primary); font-weight:800; margin-left:2px;}
-  .as-cardmeta .lbl { color:var(--c-text-muted); margin-right:2px; }
-  
-  .as-circle{position:absolute; right:16px; top:50%; transform:translateY(-50%); width:22px; height:22px; border:1.5px solid #CBD0DD; border-radius:50%; background:#fff;}
-  .as-card.sel { border-color:#1D57DF; background:#fff; box-shadow:0 4px 10px rgba(29,87,223,0.03); }
-  .as-card.sel .as-circle { border-color:#1D57DF; background:#1D57DF; }
-  .as-card.sel .as-circle::after { content:""; position:absolute; left:6px; top:6px; width:8px; height:8px; background:#fff; border-radius:50%; }
+  /* 화면 참고 이미지 */
+  figure.shot{margin:16px 0 22px; border:1px solid var(--hair); border-radius:14px; overflow:hidden; background:#F6F8FC;}
+  figure.shot img{display:block; width:100%; height:auto;}
+  figure.shot figcaption{font-size:12.5px; color:var(--ink-3); padding:11px 14px; border-top:1px solid var(--hair); background:var(--panel);}
+  figure.shot figcaption .target{color:var(--p-primary); font-weight:800;}
 
-  .as-notice{border-top:1px solid #F0F1F4; margin-top:16px; padding-top:12px;}
-  .as-notice-h{font-size:12px; font-weight:700; color:var(--c-text-sub); display:flex; align-items:center; gap:4px;}
-  .as-notice-b{font-size:11px; color:var(--c-text-muted); line-height:1.6; margin-top:6px; text-align:left;}
+  /* 라이브 프로토타입 링크 */
+  a.proto-link{display:flex; align-items:center; gap:14px; text-decoration:none;
+    background:linear-gradient(135deg,#F2F6FF,#EAF0FF); border:1px solid #D6E2FF;
+    border-radius:14px; padding:16px 18px; margin:18px 0; transition:box-shadow .18s, transform .18s;}
+  a.proto-link:hover{box-shadow:0 6px 20px rgba(43,92,230,.14); transform:translateY(-1px);}
+  a.proto-link .pl-ic{width:42px; height:42px; border-radius:11px; flex-shrink:0;
+    background:linear-gradient(145deg,#4A6EE0,#2B5CE6); box-shadow:0 3px 10px rgba(43,92,230,.32);
+    display:flex; align-items:center; justify-content:center;}
+  a.proto-link .pl-body{flex:1; min-width:0;}
+  a.proto-link .pl-title{font-size:15px; font-weight:800; color:#1E3FA3; letter-spacing:-.01em;}
+  a.proto-link .pl-url{font-family:var(--mono); font-size:12px; color:var(--ink-3); margin-top:3px; word-break:break-all;}
+  a.proto-link .pl-go{flex-shrink:0; font-size:13px; font-weight:700; color:var(--p-primary); display:flex; align-items:center; gap:5px;}
 
-  .toss-head{font-size:20px; font-weight:800; line-height:1.4; color:#161B2E; margin:6px 0; letter-spacing:-0.02em; text-align:left;}
-  .toss-sub{font-size:13px; color:var(--c-text-sub); margin-bottom:20px; text-align:left;}
-  .toss-card{padding:14px 4px; margin-bottom:10px; cursor:pointer; position:relative; border-bottom: 1px solid #F4F5F8;}
-  .toss-card.sel { background: #F1F6FF; border-radius: 10px; padding: 14px 10px; border-bottom: 0; }
-  .toss-cname{font-size:13px; color:var(--c-text-muted); margin-bottom:2px; font-weight:600; text-align:left;}
-  .toss-cfig{font-size:17px; font-weight:800; color:#161B2E; text-align:left;}
-  .toss-cfig span{color:#C5CAD4; margin:0 4px;}
-  .toss-brand-text{text-align:center; font-size:11px; color:var(--c-text-muted); margin-top:12px;}
+  /* 컬러 스와치 */
+  .swatches{display:grid; grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:12px; margin:16px 0;}
+  .sw{border:1px solid var(--hair); border-radius:12px; overflow:hidden; background:var(--panel);}
+  .sw .chipbox{height:60px; display:flex; align-items:flex-end; justify-content:flex-end; padding:8px;}
+  .sw .meta2{padding:11px 13px 13px;}
+  .sw .nm{font-size:12.5px; font-weight:800; color:var(--ink);}
+  .sw .hex{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); margin-top:2px; cursor:copy;}
+  .sw .use{font-size:11px; color:var(--ink-4); margin-top:6px; line-height:1.45;}
 
-  .tb-header-wrap{margin:8px 0 20px 0; text-align:left;}
-  .tb-main-title{
-    font-size: 19.5px; 
-    font-weight: 850; 
-    line-height: 1.2; 
-    margin: 0 0 8px 0; 
-    letter-spacing: -0.04em; 
-    color: #161B2E;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;
-    text-align: left;
-  }
-  .tb-main-title b{color:var(--c-primary); font-weight:900;}
-  .tb-sub-title{font-size:13px; color:var(--c-text-sub); margin:0; font-weight:500; letter-spacing:-0.01em; text-align:left;}
-  
-  .g-sec{margin-bottom:20px;}
-  .g-sec.hide-header .g-head { display:none !important; }
-  
-  .g-head{display:flex; flex-direction:column; margin:0 2px 10px; border-bottom:1.5px solid var(--c-line); padding-bottom:6px;}
-  .g-title{font-size:14.5px; font-weight:800; color:#161B2E; text-align:left;}
-  
-  .g-head-main{display:flex; align-items:center; justify-content:space-between; position:relative;}
-  .tb-sort-select-wrapper { position: relative; display: inline-block; }
-  .tb-sort-select{
-    appearance:none; -webkit-appearance:none; 
-    font-family:inherit; font-size:12.5px; font-weight:700; color:var(--c-text-sub); 
-    background-color:#F0F2F7; 
-    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><path d="M2.5 4L5 6.5L7.5 4" fill="none" stroke="%235B6377" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'); 
-    background-repeat:no-repeat; background-position:right 12px center; 
-    border:0; border-radius:8px; padding:6px 32px 6px 12px; cursor:pointer;
-  }
-  
-  .g-warn-container{display:none; background:#EDF3FF; border:1px solid #D6E1FB; border-radius:10px; padding:10px; margin-top:4px; text-align:left;}
-  .g-warn-msg{font-size:11.5px; font-weight:700; color:#2B5CE6; line-height:1.4;}
-  .g-unlock-btn{display:block; width:100%; text-align:center; background:#fff; border:1px solid #B0C7FA; color:#1E47C7; font-size:11px; font-weight:800; padding:6px; margin-top:6px; border-radius:6px; cursor:pointer;}
+  /* 타이포 스케일 */
+  .type-row{display:flex; align-items:baseline; gap:18px; padding:13px 0; border-bottom:1px solid var(--hair-2);}
+  .type-row .spec{flex-shrink:0; width:186px; font-family:var(--mono); font-size:12px; color:var(--ink-3);}
+  .type-row .spec b{color:var(--ink); font-weight:700;}
+  .type-row .sample{color:var(--ink);}
 
-  .g-cards-wrapper{display:flex; flex-direction:column;}
-  .g-cards-wrapper.blocked-zone .as-card{opacity:0.35;}
+  /* 코드 블록 */
+  .code{position:relative; margin:14px 0;}
+  .code pre{background:var(--code-bg); color:var(--code-fg); border-radius:12px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:12.5px; line-height:1.7; margin:0;}
+  .code .lang{position:absolute; top:11px; right:52px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--code-dim);}
+  .code .copy{position:absolute; top:9px; right:10px; background:#1E293B; color:#B7C3DC; border:1px solid #2D3A52; font-size:11px; font-weight:700; padding:4px 9px; border-radius:7px; cursor:pointer; font-family:var(--sans);}
+  .code .copy:hover{background:#2A3752; color:#fff;}
+  .code .copy.ok{color:#9BE0A8; border-color:#2E5A3E;}
 
-  .g-pick-marker { position:absolute; right:16px; top:50%; transform:translateY(-50%); width:22px; height:22px; border:1.5px solid #CBD0DD; background:#fff; transition:all 0.12s; display:flex; align-items:center; justify-content:center; }
-  
-  .phone:not(.mode-single) .g-pick-marker { border-radius: 6px; }
-  .phone:not(.mode-single) .as-card.sel { border-color: var(--c-primary); background: #F7F9FF; box-shadow: 0 4px 12px rgba(43,92,230,0.04); }
-  .phone:not(.mode-single) .as-card.sel .g-pick-marker { border-color: var(--c-primary); background: var(--c-primary); }
-  .phone:not(.mode-single) .as-card.sel .g-pick-marker::after { content:""; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg) translateY(-1px); }
+  /* 상태/구조 리스트 */
+  .kv{display:grid; grid-template-columns:150px 1fr; gap:8px 20px; margin:12px 0; font-size:13.5px;}
+  .kv dt{font-weight:700; color:var(--ink);}
+  .kv dd{margin:0; color:var(--ink-2);}
+  ul.tick{list-style:none; padding:0; margin:12px 0;}
+  ul.tick li{position:relative; padding:5px 0 5px 24px; color:var(--ink-2); font-size:13.5px;}
+  ul.tick li::before{content:""; position:absolute; left:2px; top:11px; width:7px; height:7px; border-radius:50%; background:var(--p-primary);}
 
-  .phone.mode-single .g-pick-marker { border-radius: 50%; }
-  .phone.mode-single .as-card.sel { border-color: var(--c-primary); background: #F7F9FF; }
-  .phone.mode-single .as-card.sel .g-pick-marker { border-color: var(--c-primary); background: var(--c-primary); }
-  .phone.mode-single .as-card.sel .g-pick-marker::after { content:""; width:6px; height:6px; background:#fff; border-radius:50%; }
+  .anatomy{font-family:var(--mono); font-size:12px; color:var(--ink-2); background:#F6F8FC; border:1px solid var(--hair); border-radius:12px; padding:18px 20px; white-space:pre; overflow-x:auto; line-height:1.75;}
 
-  .tb-new-badge {
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    background: #E6F7ED;
-    color: var(--c-tobe);
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 4px;
-    letter-spacing: 0.02em;
-    line-height: 1;
-  }
-  .as-card.has-badge { padding-top: 32px; }
+  .flag{display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.03em; padding:2px 8px; border-radius:6px; vertical-align:middle; margin-left:8px;}
+  .flag.p{background:#E7EEFF; color:#1E3FA3;}
+  .flag.s{background:#EEF0F4; color:var(--ink-3);}
+
+  .split{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:1080px){ .wrap{grid-template-columns:1fr;} .toc{display:none;} main{padding:44px 26px 100px;} .split{grid-template-columns:1fr;} }
+
+  footer{margin-top:80px; padding-top:24px; border-top:1px solid var(--hair); font-size:12.5px; color:var(--ink-4);}
+
+  /* 프로젝트 정의 섹션 전용 */
+  .st{display:inline-block; font-size:10.5px; font-weight:800; padding:2px 9px; border-radius:999px; vertical-align:middle; margin-left:8px;}
+  .st.done{background:#DCFCE7; color:#15803D;}
+  .st.plan{background:#FEF3C7; color:#92600A;}
+  ol.dir{counter-reset:d; list-style:none; padding:0; margin:16px 0; display:flex; flex-direction:column; gap:12px;}
+  ol.dir > li{counter-increment:d; position:relative; padding:16px 18px 16px 56px; background:var(--panel); border:1px solid var(--hair); border-radius:14px;}
+  ol.dir > li::before{content:counter(d); position:absolute; left:16px; top:16px; width:28px; height:28px; border-radius:8px; background:#E7EEFF; color:#1E3FA3; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center;}
+  ol.dir .dt{font-size:15px; font-weight:800; color:var(--ink); letter-spacing:-.01em;}
+  ol.dir .dd{font-size:13px; color:var(--ink-3); margin-top:4px;}
+  .timeline{margin:16px 0;}
+  .tl-row{display:grid; grid-template-columns:120px 1fr; gap:16px; padding:12px 0; border-bottom:1px solid var(--hair-2);}
+  .tl-row:last-child{border-bottom:none;}
+  .tl-when{font-family:var(--mono); font-size:12.5px; font-weight:700; color:var(--p-primary);}
+  .tl-what b{color:var(--ink);}
+  .tl-what div{font-size:12.5px; color:var(--ink-3); margin-top:2px;}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="main-layout">
-  
-  <div class="main-content">
-    <div class="head">
-      <h1 class="head__title">비대면 한도조회 결과 v1</h1>
-      <div class="head__sub">GNB 화면이름 가운데 정렬 헤더 시스템 및 최대한도 복합 가산 로직 검증 프로토타입</div>
-    </div>
+  <!-- ─────────── 목차 ─────────── -->
+  <aside class="toc">
+    <div class="brand">TO-BE 퍼블리싱 핸드오프<small>대출한도 조회 · UI/UX 개편안</small></div>
+    <nav>
+      <div class="grp">프로젝트 정의</div>
+      <a href="#purpose">01 · 목적</a>
+      <a href="#direction">02 · 기획 방향 (3갈래)</a>
+      <a href="#scope">03 · 작업 범위</a>
+      <a href="#schedule">04 · 일정</a>
+      <div class="grp">개요</div>
+      <a href="#overview">05 · 문서 개요 &amp; 범위</a>
+      <a href="#overview" style="padding-left:26px;color:var(--ink-3)">· 화면 참고 (TO-BE 목표)</a>
+      <div class="grp">기초 토큰</div>
+      <a href="#colors">06 · 컬러</a>
+      <a href="#type">07 · 타이포그래피</a>
+      <a href="#tokens">08 · 라디우스 · 그림자 · 간격</a>
+      <a href="#motion">09 · 모션 · 키프레임</a>
+      <div class="grp">매핑</div>
+      <a href="#mapping">10 · 디자인 토큰 매핑 워크시트</a>
+      <div class="grp">화면 1</div>
+      <a href="#s1-structure">11 · 한도조회중 구조</a>
+      <a href="#s1-components">12 · 컴포넌트 &amp; 상태</a>
+      <a href="#s1-copy">13 · 카피(메시지 로테이션)</a>
+      <a href="#s1-markup">14 · 마크업</a>
+      <div class="grp">화면 2</div>
+      <a href="#s2-structure">15 · 한도조회 결과 구조</a>
+      <a href="#s2-data">16 · 상품 데이터</a>
+      <a href="#s2-components">17 · 컴포넌트</a>
+      <a href="#s2-rules">18 · 비즈니스 규칙</a>
+      <a href="#s2-markup">19 · 마크업</a>
+      <div class="grp">공통</div>
+      <a href="#copy">20 · 카피 인벤토리</a>
+      <a href="#qa">21 · 접근성 · QA 체크</a>
+    </nav>
+  </aside>
 
-    <div class="stage">
-      <div class="control-panel">
-        <div class="control-row" style="margin-bottom: 4px;">
-          <span class="control-label">🖥️ 화면 모드:</span>
-          <div class="view-selector" id="viewSelector">
-            <button type="button" class="active" data-view="asis">AS-IS (현행 복원)</button>
-            <button type="button" data-view="toss">토스 참고 (웹뷰)</button>
-            <button type="button" data-view="tobe">TO-BE 개편안</button>
-          </div>
-          <button type="button" class="btn-sm danger" id="btnClearStorage" style="margin-left:auto;">시뮬레이터 초기화 🧹</button>
+  <main>
+    <!-- ─────────── 헤더 ─────────── -->
+    <header class="hero">
+      <div class="eyebrow">Publishing Handoff</div>
+      <h1>신디 모바일화면· TO-BE 퍼블리싱 정의서</h1>
+      <p>UI/UX 변경후화면(TO-BE)  — <b>① 한도조회중(로딩화면)</b>, <b>② 한도조회 결과화면 </b> —기획내용을 정리한 핸드오프 문서입니다. 디자인 토큰 · 컴포넌트 명세 · 인터랙션 · 카피 · 정적 마크업을 한 파일에 담았습니다.참고용으로 봐주세요 (상세내용 아래 내용 참고부탁 드리며 관련 궁금사항은 민설안프로에게 문의주세요.)</p>
+      <div class="meta">
+        <span class="chip">기준뷰포트 <b>모바일 웹뷰 (≈380px)</b></span>
+        <span class="chip">개발요청화면 <b>2종</b></span>
+        <span class="chip">Primary <b>#2B5CE6</b></span>
+        <span class="chip">폰트 <b>Noto Sans KR</b></span>
+        <a class="chip" href="https://mode-jog-88267098.figma.site" target="_blank" rel="noopener" style="text-decoration:none;color:var(--p-primary)"><b>▶ 라이브 프로토타입</b></a>
+      </div>
+    </header>
+
+    <!-- 01 목적 -->
+    <section id="purpose">
+      <h2>Purpose</h2>
+      <div class="h2sub">01 · 목적</div>
+      <p class="lead">고객을 위한, 고객이 불편하지 않은 비대면 대출 서비스. 한도조회부터 전자약정까지의 프로세스에서 고객이 <b>중요사항을 명확하고 쉽게 이해</b>할 수 있도록 화면을 개선한다.</p>
+      <div class="note">핵심 가치: <b>이해 가능성(Comprehension)</b>. 정보를 더 넣는 것이 아니라, 핵심을 <b>쉬운 말·명확한 위계·적절한 단계</b>로 재구성해 고객의 인지 부담을 낮추는 것을 목표로 한다.(고객혁신과제선정)</div>
+    </section>
+
+    <!-- 02 기획 방향 -->
+    <section id="direction">
+      <h2>Direction</h2>
+      <div class="h2sub">02 · 기획 방향 (3가지의 기준을 잡았습니다.))</div>
+      <ol class="dir">
+        <li>
+          <div class="dt">금융 소비자보호 기반 화면 개선</div>
+          <div class="dd">중요사항 이해여부 확인, 온라인 설명의무 강화, 다크패턴 가이드라인 준수 — 규제와의무를 충족하면서 고객이 실제로 이해하도록.</div>
+        </li>
+        <li>
+          <div class="dt">고객 주관식 의견 기반 개선</div>
+          <div class="dd">대출계약체결 완료 화면의 고객만족도 조사 결과 및 주관식 설문 의견을 화면 개선에 직접 반영.</div>
+        </li>
+        <li>
+          <div class="dt">토스웹뷰토 화면 장점 추출·벤치마킹</div>
+          <div class="dd">"이 부분이 좋아서 참고했습니다." 수준의 취지만 반영예정 — 표현·정보구조의 장점을 발췌해 적용(그대로 복제 아님).</div>
+        </li>
+      </ol>
+      <table>
+        <thead><tr><th style="width:220px">방향</th><th>주로 반영되는 화면</th></tr></thead>
+        <tbody>
+          <tr><td><b>① 대출 조건·고객 부담비용·권리사항을 쉬운 용어와 시각화로 명확화 </b></td><td>중요사항 이해여부화면</td></tr>
+          <tr><td><b>② 고객 의견</b></td><td>한도조회~전자약정화면</td></tr>
+          <tr><td><b>③ 벤치마킹</b></td><td>한도조회중,동의화면 등</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 03 작업 범위 -->
+    <section id="scope">
+      <h2>Scope</h2>
+      <div class="h2sub">03 · 작업 범위</div>
+      <p class="lead">비대면 대출영역 화면의 <b>UI/UX개선예정/b> (레이아웃, 정보 순서, 시각적 강조, 폰트/색/여백, 핵심정보 요약, 쉬운 말 풀이, 단계 나누기 등 프론트엔드 개발).</p>
+      <table>
+        <thead><tr><th style="width:70px">단계</th><th style="width:180px">화면</th><th>개선 초점</th><th style="width:110px">현재 상태</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">01</td><td><b>한도조회중</b> (로딩)</td><td>대기 경험 개선 — 단계별 진행 안내, 이탈 방지, 안심 메시지</td><td><span class="st done">설계·프로토타입</span></td></tr>
+          <tr><td class="mono">02</td><td><b>한도조회 결과</b></td><td>상품 선택 UX — 요약·정렬·추천 조합·규제 확인</td><td><span class="st done">설계·프로토타입</span></td></tr>
+          <tr><td class="mono">03</td><td><b>신청</b></td><td>입력 단계 나누기, 핵심정보 요약, 다크패턴 제거</td><td><span class="st plan">설계 예정</span></td></tr>
+          <tr><td class="mono">04</td><td><b>중요사항 이해여부</b></td><td>이해여부 확인 UI, 온라인 설명의무 강화, 쉬운 말 풀이</td><td><span class="st plan">설계 예정</span></td></tr>
+          <tr><td class="mono">05</td><td><b>전자약정 (전자서명)</b></td><td>약관 위계 정리, 핵심 조건 요약, 서명 흐름 명확화</td><td><span class="st plan">설계 예정</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note"><b>포함:</b> 화면의 표현·정보구조 개선(프론트엔드). &nbsp;·&nbsp; 레이아웃 / 정보 순서 / 시각적 강조 / 폰트·색·여백 / 핵심정보 요약 / 쉬운 말 풀이 / 단계 나누기.</div>
+    </section>
+
+    <!-- 04 일정 -->
+    <section id="schedule">
+      <h2>Schedule</h2>
+      <div class="h2sub">04 · 일정</div>
+      <p class="lead">목표: <b>10월까지</b> 기획·설계·개발·테스트·반영 완료.</p>
+      <div class="timeline">
+        <div class="tl-row"><div class="tl-when">기획·설계</div><div class="tl-what"><b>화면 정의 · 정보구조 재설계</b><div앞단의 한도조회결과까지 우선,화면단위 쪼개서 개발(수민프로님협의완)</div></div></div>
+        <div class="tl-row"><div class="tl-when">개발~10월 초</div><div class="tl-what"><b>퍼블리싱 · 프론트엔드 구현</b><div>화면 단위 순차 적용</div></div></div>
+        <div class="tl-row"><div class="tl-when">테스트~10월중순</div><div class="tl-what"><b>QA</b><div>현업검수</div></div></div>
+        <div class="tl-row"><div class="tl-when">~10월 27일 목표</div><div class="tl-what"><b>반영</b><div>운영계 적용</div></div></div>
+      </div>
+    </section>
+
+    <!-- 05 개요 -->
+    <section id="overview">
+      <h2>Overview</h2>
+      <div class="h2sub">문서 개요 &amp; 작업 범위</div>
+      <p class="lead">본 문서는 프로토타입(React)에서 확정된 TO-BE 사양을 퍼블리싱 관점으로 정리하였습니다.. 값(색상·간격·타이밍)은 모두 확정치이며, 아래 마크업은 프레임워크 비종속 정적 HTML/CSS로 재구성했습니다.</p>
+
+      <a class="proto-link" href="https://mode-jog-88267098.figma.site" target="_blank" rel="noopener">
+        <span class="pl-ic" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 3h8M8 3v18M8 3H6a3 3 0 000 6h2m0 0h4a3 3 0 100-6H8m0 6v6m0-6h2a3 3 0 110 6 3 3 0 01-3-3v-3m0 6a3 3 0 11-3-3 3 3 0 013 3z" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="pl-body">
+          <span class="pl-title">라이브 인터랙티브 프로토타입 열기</span>
+          <span class="pl-url">https://mode-jog-88267098.figma.site</span>
+        </span>
+        <span class="pl-go">바로가기 ↗</span>
+      </a>
+      <p class="lead" style="font-size:13px;color:var(--ink-3);margin-top:-6px">실제 상태 전환 · 애니메이션 타이밍 · 바텀시트/토스트 동작은 위 프로토타입에서 직접 확인하는 것이 가장 정확합니다. 본 문서는 그 사양을 문서화한 것입니다.</p>
+
+      <table>
+        <thead><tr><th style="width:80px">화면</th><th>이름</th><th>역할</th><th>핵심 상호작용</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">STEP 01</td><td><b>한도조회중</b> (로딩)</td><td>공공마이데이터 조회 대기 화면</td><td>메시지 로테이션 · 이탈방지 바텀시트 · 완료 전환</td></tr>
+          <tr><td class="mono">STEP 02</td><td><b>한도조회 결과</b></td><td>대출 상품 선택</td><td>정렬 · 그룹 배타선택 · 추천조합 시트 · 규제 확인 팝업 · 토스트</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note"><b>제외 범위:</b> AS-IS(현행)·토스 참고 화면은 비교용이며 퍼블리싱 대상이 아닙니다. 03 신청화면 이후 단계도 본 문서 범위 밖입니다.</div>
+
+      <h3>화면 참고 · 구현 목표(TO-BE)</h3>
+      <p class="lead">제가 기획한 의도를 시각적으로 명확히 전달하기위해 <b>피그마 디자인 시스템을 적용하여 표준화한 화면 명세도 만들어보았습니다.(한도조회,한도조회결과화면)</b>피그마 디자인 시스템 기반의 구조화된 UI 산출물 입니다. 리테일,AX혁신부서와 즉각적인 데이터 공유가 가능합니다.(아래 캡처를 참고해주세요.)</p>
+       
+<figure class="shot">
+  <!-- 스토리보드 이미지 -->
+  <img src="https://i.ibb.co/7dTkbCn5/tobe.png" alt="TO-BE 전체 플로우 스토리보드" />
+  <figcaption><span class="target">화면 참고 · 구현 목표(TO-BE)</span> — 전체 플로우</figcaption>
+</figure>
+
+<section id="dev-guide">
+  <div class="h2sub">디자인 사양 추출 (Figma Dev Mode)</div>
+  <p class="lead">Figma의 <b>Dev Mode</b>를 활용하면 간격, 컬러, 폰트 등의 사양을 즉시 확인하실 수 있습니다.</p>
+  <figure class="shot">
+    <!-- Dev 모드 가이드 이미지 -->
+    <img src="https://i.ibb.co/bgVsg5Dw/DEV.png" alt="Figma Dev Mode 디자인 사양 추출 가이드" />
+    <figcaption><span class="target">Tip</span> — Figma Dev Mode의 CSS 탭에서 레이아웃 수치와 스타일 속성을 직접 추출해 사용하세요.</figcaption>
+  </figure>
+</section>
+
+    <!-- 02 컬러 -->
+    <!-- 06 컬러 -->
+    <section id="colors">
+      <h2>Design Tokens</h2>
+      <div class="h2sub">컬러 팔레트</div>
+      <p class="lead">hex를 클릭하면 복사됩니다. CSS 변수명은 구현 편의를 위한 제안값이며, 모든 값은 프로토타입(React) 확정치입니다.</p>
+
+      <h3>기본 · 텍스트</h3>
+      <div class="swatches">
+        <div class="sw"><div class="chipbox" style="background:#2B5CE6"></div><div class="meta2"><div class="nm">Primary</div><div class="hex">#2B5CE6</div><div class="use">CTA · 강조 · 활성 정렬 · 아이콘 · 링크</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#161B2E"></div><div class="meta2"><div class="nm">Text</div><div class="hex">#161B2E</div><div class="use">기본 텍스트 · 헤드라인 · 상품명</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#5B6377"></div><div class="meta2"><div class="nm">Text-sub</div><div class="hex">#5B6377</div><div class="use">보조 텍스트 · 설명 · 완료 서브</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#9298A8"></div><div class="meta2"><div class="nm">Text-muted</div><div class="hex">#9298A8</div><div class="use">캡션 · 비활성 정렬 · 안내문</div></div></div>
+      </div>
+
+      <h3>라인 · 배경 · 패널</h3>
+      <div class="swatches">
+        <div class="sw"><div class="chipbox" style="background:#EAEDF3"></div><div class="meta2"><div class="nm">Line</div><div class="hex">#EAEDF3</div><div class="use">구분선 · 카드/헤더 테두리</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#EEF1F7"></div><div class="meta2"><div class="nm">BG-page</div><div class="hex">#EEF1F7</div><div class="use">페이지(뷰포트) 배경</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#FFFFFF;border:1px solid #EAEDF3"></div><div class="meta2"><div class="nm">Panel</div><div class="hex">#FFFFFF</div><div class="use">카드 · 시트 · 팝업 배경</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#F6F8FF"></div><div class="meta2"><div class="nm">Selected-bg</div><div class="hex">#F6F8FF</div><div class="use">선택된 상품카드 배경</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#B8CAFF"></div><div class="meta2"><div class="nm">Selected-border</div><div class="hex">#B8CAFF</div><div class="use">선택된 상품카드 테두리</div></div></div>
+      </div>
+
+      <h3>라디오 · 배지</h3>
+      <div class="swatches">
+        <div class="sw"><div class="chipbox" style="background:#5B8BF0"></div><div class="meta2"><div class="nm">Radio-fill</div><div class="hex">#5B8BF0</div><div class="use">라디오 선택 채움</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#7FA4F5"></div><div class="meta2"><div class="nm">Radio-on</div><div class="hex">#7FA4F5</div><div class="use">라디오 선택 테두리</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#C9CEDA"></div><div class="meta2"><div class="nm">Radio-off</div><div class="hex">#C9CEDA</div><div class="use">라디오 비선택 테두리</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#DBEAFE"><span class="badge-reco">★추천★</span></div><div class="meta2"><div class="nm">추천 badge</div><div class="hex">#DBEAFE / #1D4ED8</div><div class="use">햇살론 추천 배지</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#DCFCE7"><span class="badge-new">NEW</span></div><div class="meta2"><div class="nm">NEW badge</div><div class="hex">#DCFCE7 / #15803D</div><div class="use">사잇돌2+참신한더드림론</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#FEF3C7"><span class="badge-life">생활안정</span></div><div class="meta2"><div class="nm">생활안정 badge</div><div class="hex">#FEF3C7 / #B45309</div><div class="use">중금리 생활안정대출 (신규)</div></div></div>
+      </div>
+
+      <h3>특수 · 오버레이</h3>
+      <div class="swatches">
+        <div class="sw"><div class="chipbox" style="background:#EEF3FF;border:1px solid #D6E2FF"></div><div class="meta2"><div class="nm">Accent-soft</div><div class="hex">#EEF3FF / #D6E2FF / #1E3FA3</div><div class="use">추천 조합 트리거(bg/border/ink)</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#1E3A8A"></div><div class="meta2"><div class="nm">Info-chip ink</div><div class="hex">#1E3A8A</div><div class="use">"신용점수에 영향 없어요" 텍스트</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:rgba(30,32,40,.92)"></div><div class="meta2"><div class="nm">Toast</div><div class="hex">rgba(30,32,40,.92) / #F1F3F8</div><div class="use">변경 안내 토스트(bg/text)</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#F1F3F5"></div><div class="meta2"><div class="nm">CTA-disabled</div><div class="hex">#F1F3F5 / #495057</div><div class="use">미선택 CTA(bg/text)</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#E0E3EA"></div><div class="meta2"><div class="nm">Sheet-handle</div><div class="hex">#E0E3EA</div><div class="use">바텀시트 핸들바 · 노치</div></div></div>
+        <div class="sw"><div class="chipbox" style="background:#F2F4F6"></div><div class="meta2"><div class="nm">Ghost-btn</div><div class="hex">#F2F4F6 / #5B6377</div><div class="use">이탈방지 "그만두기" 버튼</div></div></div>
+      </div>
+
+      <div class="note"><b>그라디언트 3종</b> — 완료 체크 원: <code>linear-gradient(145deg,#5B8BF0,#2B5CE6)</code> · 로딩 도트: <code>radial-gradient(circle at 35% 35%,#6B9BFF,#2B5CE6)</code> · 인포칩 아이콘: <code>linear-gradient(145deg,#4A6EE0,#2B5CE6)</code></div>
+      <div class="note warn"><b>변경점</b> — 이번 개편에 <b>생활안정 배지(#FEF3C7/#B45309)</b>가 추가되었습니다. 라디오 채움/테두리 색은 파랑 계열(#5B8BF0/#7FA4F5)로 확정되었습니다.</div>
+    </section>
+
+    <!-- 07 타이포 -->
+    <section id="type">
+      <h2>Design Tokens</h2>
+      <div class="h2sub">타이포그래피</div>
+      <p class="lead">폰트 패밀리 <code>"Noto Sans KR","Pretendard",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif</code>. 한글 헤드라인은 <code>word-break:keep-all</code>로 어절 단위 줄바꿈. 뷰포트 폭 380px 기준 실제 픽셀값입니다.</p>
+
+      <div style="margin:16px 0;">
+        <div class="type-row"><div class="spec"><b>22</b> / 800 / -.03em</div><div class="sample" style="font-size:22px;font-weight:800;letter-spacing:-.03em;">완료 · 한도 조회가 끝났어요</div></div>
+        <div class="type-row"><div class="spec"><b>21</b> / 800 / -.03em</div><div class="sample" style="font-size:21px;font-weight:800;letter-spacing:-.03em;">로딩 헤드라인</div></div>
+        <div class="type-row"><div class="spec"><b>19</b> / 800 / -.02em</div><div class="sample" style="font-size:19px;font-weight:800;letter-spacing:-.02em;">시트 제목 · 규제 팝업 제목</div></div>
+        <div class="type-row"><div class="spec"><b>18</b> / 800 / -.03em</div><div class="sample" style="font-size:18px;font-weight:800;letter-spacing:-.03em;">결과 히어로 · 이탈방지 제목</div></div>
+        <div class="type-row"><div class="spec"><b>16</b> / 700 / -.02em</div><div class="sample" style="font-size:16px;font-weight:700;letter-spacing:-.02em;">결과 헤더 타이틀</div></div>
+        <div class="type-row"><div class="spec"><b>16</b> / 500~800</div><div class="sample" style="font-size:16px;font-weight:500;">메인 CTA(500) · 시트 확정 버튼(800)</div></div>
+        <div class="type-row"><div class="spec"><b>15</b> / 700 / -.02em</div><div class="sample" style="font-size:15px;font-weight:700;letter-spacing:-.02em;">로딩 헤더 타이틀</div></div>
+        <div class="type-row"><div class="spec"><b>15</b> / 700</div><div class="sample" style="font-size:15px;font-weight:700;">상품 금리 · 한도 값</div></div>
+        <div class="type-row"><div class="spec"><b>14</b> / 800 / -.02em</div><div class="sample" style="font-size:14px;font-weight:800;letter-spacing:-.02em;">상품명</div></div>
+        <div class="type-row"><div class="spec"><b>14</b> / 700</div><div class="sample" style="font-size:14px;font-weight:700;">추천 조합 트리거 · 활성 정렬</div></div>
+        <div class="type-row"><div class="spec"><b>13.5</b> / 400~500</div><div class="sample" style="font-size:13.5px;">본문 · 설명 · 상품 부가정보</div></div>
+        <div class="type-row"><div class="spec"><b>13</b> / 600</div><div class="sample" style="font-size:13px;font-weight:600;">인포칩 · 아코디언 라벨</div></div>
+        <div class="type-row"><div class="spec"><b>12.5</b> / 500</div><div class="sample" style="font-size:12.5px;">토스트 문구</div></div>
+        <div class="type-row"><div class="spec"><b>11.5</b> / 500</div><div class="sample" style="font-size:11.5px;color:#9298A8;">캡션 · 안내문(신용점수 · 화면 출처)</div></div>
+      </div>
+    </section>
+
+    <!-- 08 라디우스·그림자·간격 -->
+    <section id="tokens">
+      <h2>Design Tokens</h2>
+      <div class="h2sub">라디우스 · 그림자 · 간격</div>
+
+      <h3>Radius</h3>
+      <table>
+        <thead><tr><th style="width:120px">값</th><th>적용</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">999</td><td>배지 · 핸들바 · 라디오 · 완료 체크 원 · 정렬 pill</td></tr>
+          <tr><td class="mono">24</td><td>바텀시트/팝업 상단(24 24 0 0)</td></tr>
+          <tr><td class="mono">16</td><td>상품 카드</td></tr>
+          <tr><td class="mono">14</td><td>시트 확정 버튼 · 토스트</td></tr>
+          <tr><td class="mono">13</td><td>메인 CTA · 이탈방지 버튼</td></tr>
+          <tr><td class="mono">12</td><td>추천 조합 트리거 · 인포칩 · 규제팝업 버튼</td></tr>
+          <tr><td class="mono">8</td><td>인포칩 아이콘 박스</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Shadow</h3>
+      <table>
+        <thead><tr><th style="width:200px">토큰</th><th>값</th></tr></thead>
+        <tbody>
+          <tr><td>바텀시트/팝업</td><td class="mono">0 -8px 40px rgba(0,0,0,.14)</td></tr>
+          <tr><td>완료 체크 원</td><td class="mono">0 8px 32px rgba(43,92,230,.35), 0 2px 8px rgba(43,92,230,.2)</td></tr>
+          <tr><td>로딩 도트</td><td class="mono">0 2px 6px rgba(43,92,230,.45)</td></tr>
+          <tr><td>인포칩</td><td class="mono">0 2px 8px rgba(43,92,230,.08), inset 0 1px 0 rgba(255,255,255,.8)</td></tr>
+          <tr><td>토스트</td><td class="mono">0 4px 20px rgba(0,0,0,.18)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Spacing</h3>
+      <table>
+        <thead><tr><th style="width:200px">영역</th><th>값</th></tr></thead>
+        <tbody>
+          <tr><td>화면 좌우 패딩</td><td class="mono">16 (로딩 본문 22)</td></tr>
+          <tr><td>헤더 높이 / 노치</td><td class="mono">52 / 20 (핸들 90×4)</td></tr>
+          <tr><td>바텀시트 핸들바</td><td class="mono">36×4</td></tr>
+          <tr><td>바텀시트 패딩</td><td class="mono">추천 20 20 28 · 규제 20 20 28 · 이탈 22 20 24</td></tr>
+          <tr><td>상품 카드 패딩 / 간격</td><td class="mono">15 14 / 세로 11</td></tr>
+          <tr><td>마스코트 크기</td><td class="mono">150 (GIF) · 완료 체크 원 104</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 09 모션 -->
+    <section id="motion">
+      <h2>Design Tokens</h2>
+      <div class="h2sub">모션 · 키프레임</div>
+      <table>
+        <thead><tr><th style="width:220px">요소</th><th style="width:150px">속성</th><th>duration / easing</th></tr></thead>
+        <tbody>
+          <tr><td>바텀시트/팝업 등장</td><td>transform</td><td class="mono">.30~.32s cubic-bezier(.32,.72,0,1)</td></tr>
+          <tr><td>딤(dim)</td><td>opacity</td><td class="mono">.25~.28s ease</td></tr>
+          <tr><td>토스트</td><td>opacity + transform</td><td class="mono">.22s ease</td></tr>
+          <tr><td>송금시간 아코디언</td><td>max-height</td><td class="mono">.3s cubic-bezier(.4,0,.2,1)</td></tr>
+          <tr><td>셰브론(▾)</td><td>rotate 180°</td><td class="mono">.22s ease</td></tr>
+          <tr><td>메시지 전환</td><td>fade+up (tossRefFadeIn)</td><td class="mono">.35s ease</td></tr>
+          <tr><td>로딩 도트</td><td>mascotDotBounce</td><td class="mono">1.2s infinite (0.15s stagger)</td></tr>
+        </tbody>
+      </table>
+      <div class="code"><span class="lang">css</span><button class="copy">복사</button><pre>@keyframes mascotDotBounce{
+  0%,80%,100%{ transform:translateY(0); opacity:.35 }
+  40%{ transform:translateY(-5px); opacity:1 }
+}
+@keyframes tossRefFadeIn{
+  from{ opacity:0; transform:translateY(4px) }
+  to{ opacity:1; transform:translateY(0) }
+}
+/* 바텀시트 */
+.sheet{ transform:translateY(100%); transition:transform .30s cubic-bezier(.32,.72,0,1) }
+.sheet.open{ transform:translateY(0) }
+/* 딤 */
+.dim{ opacity:0; transition:opacity .25s ease } .dim.open{ opacity:1 }</pre></div>
+      <div class="note"><b>reduced-motion</b> — <code>@media (prefers-reduced-motion: reduce)</code>에서 도트/링/스피너 애니메이션을 정지하고, 마스코트 GIF는 정지 프레임(캔버스 캡처)으로 대체합니다.</div>
+    </section>
+
+    <!-- 10 매핑 -->
+    <section id="mapping">
+      <h2>Handoff</h2>
+      <div class="h2sub">디자인 토큰 매핑 워크시트</div>
+      <p class="lead">실제값은 확정치입니다. <b>Figma 변수명</b> 셀은 등록 후 채워 주세요(클릭하여 입력, 인쇄 시 빈칸 처리).</p>
+      <table>
+        <thead><tr><th style="width:190px">토큰</th><th style="width:200px">실제값</th><th class="fill-h">Figma 변수명</th></tr></thead>
+        <tbody>
+          <tr><td>color/primary</td><td class="mono">#2B5CE6</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>color/text</td><td class="mono">#161B2E</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>color/selected-bg</td><td class="mono">#F6F8FF</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>color/radio-fill</td><td class="mono">#5B8BF0</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>color/badge-life</td><td class="mono">#FEF3C7 / #B45309</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>radius/card</td><td class="mono">16</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>radius/sheet-top</td><td class="mono">24</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>space/screen-x</td><td class="mono">16</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>type/hero</td><td class="mono">18 / 800 / -.03em</td><td class="fill" contenteditable="true"></td></tr>
+          <tr><td>type/product-name</td><td class="mono">14 / 800 / -.02em</td><td class="fill" contenteditable="true"></td></tr>
+        </tbody>
+      </table>
+      <div class="note">컴포넌트 권장: <b>ProductCard</b>(Variant: State=Default/Selected, Badge=None/추천/NEW/생활안정), <b>Sheet</b>(추천조합/규제/이탈), <b>SortToggle</b>, <b>InfoChip</b>, <b>Toast</b>.</div>
+    </section>
+
+    <!-- 11 화면1 구조 -->
+    <section id="s1-structure">
+      <h2>화면 1 · 한도조회중</h2>
+      <div class="h2sub">구조 · 레이아웃</div>
+      <p class="lead">조회 대기 경험(로딩) 개선 화면. 회색 딤(AS-IS)의 "멈춤·오류 오인" 문제를 마스코트·단계별 메시지·안심 인포칩으로 해소하고, 뒤로가기 시 이탈 방지 시트로 조회 취소를 막습니다.</p>
+      <div class="anatomy">┌─ Screen (390 webview) ────────────┐
+│ Notch (20)                        │
+│ Header (52)                       │
+│   ‹ 뒤로가기 → 이탈방지 시트 트리거 │
+│   "대출한도 조회" (15/700)         │
+│ ┌─ Body (flex, 22 좌우) ─────────┐ │
+│ │   Mascot GIF (150)            │ │
+│ │   Loading dots ●●● (bounce)   │ │
+│ │   Message (21/800, 2줄, fade) │ │
+│ │   Sub (14, muted)             │ │
+│ │   ── (그라디언트 divider) ──    │ │
+│ │   InfoChip 🛡 신용점수 영향없음 │ │
+│ └───────────────────────────────┘ │
+│ (완료 시 → 체크 원 104 + 문구)      │
+└───────────────────────────────────┘
+  Overlay: 이탈 방지 바텀시트</div>
+    </section>
+
+    <!-- 12 화면1 컴포넌트 -->
+    <section id="s1-components">
+      <h2>화면 1 · 한도조회중</h2>
+      <div class="h2sub">컴포넌트 &amp; 상태</div>
+      <table>
+        <thead><tr><th style="width:150px">컴포넌트</th><th>사양</th></tr></thead>
+        <tbody>
+          <tr><td><b>Mascot</b></td><td>GIF(150px). <code>reduced-motion</code> 시 첫 프레임을 캔버스로 캡처해 정지 이미지 대체.</td></tr>
+          <tr><td><b>Loading dots</b></td><td>3개 · <code>radial-gradient(circle at 35% 35%,#6B9BFF,#2B5CE6)</code> · <code>mascotDotBounce 1.2s</code> · 0.15s stagger.</td></tr>
+          <tr><td><b>Message rotator</b></td><td>5개 메시지 · <b>2,600ms</b> 간격 순환 · 전환 <code>tossRefFadeIn .35s</code> · 2줄 clamp · <code>keep-all</code>.</td></tr>
+          <tr><td><b>InfoChip</b></td><td>하단 고정 · Accent-soft 배경 · 아이콘 박스(8, 그라디언트) + "한도 조회는 신용점수에 영향을 주지 않아요"(13/600, #1E3A8A).</td></tr>
+          <tr><td><b>완료 체크</b></td><td>원 104px 그라디언트(145deg,#5B8BF0→#2B5CE6) + 흰 체크. 헤드라인 22/800.</td></tr>
+          <tr><td><b>이탈방지 시트</b></td><td>뒤로가기 시 등장. [그만두기](Ghost) / [계속 조회하기](Primary).</td></tr>
+        </tbody>
+      </table>
+      <h4>상태</h4>
+      <ul class="tick">
+        <li><b>loading</b> — 메시지 순환, 뒤로가기 노출.</li>
+        <li><b>done</b> — 마지막 메시지 후 체크 화면, 뒤로가기 숨김, 결과로 전환.</li>
+        <li><b>exit-sheet open</b> — 딤 + 시트 노출(딤 클릭/계속 조회하기 → 닫힘).</li>
+      </ul>
+    </section>
+
+    <!-- 13 화면1 카피 -->
+    <section id="s1-copy">
+      <h2>화면 1 · 한도조회중</h2>
+      <div class="h2sub">카피 (메시지 로테이션)</div>
+      <table>
+        <thead><tr><th style="width:44px">#</th><th>헤드라인</th><th style="width:170px">서브</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td>한도 조회를 시작할게요</td><td>보통 1분 안에 끝나요</td></tr>
+          <tr><td class="mono">2</td><td>공공마이데이터로<br>필요한 정보를 가져오고 있어요</td><td>잠시만 기다려주세요</td></tr>
+          <tr><td class="mono">3</td><td>고객님이 받을 수 있는<br>대출을 찾고 있어요</td><td>잠시만 기다려주세요</td></tr>
+          <tr><td class="mono">4</td><td>조건에 맞는 상품을<br>확인하고 있어요</td><td>잠시만 기다려주세요</td></tr>
+          <tr><td class="mono">5</td><td>거의 다 끝났어요</td><td>조금만 기다려주세요</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th style="width:120px">위치</th><th>문구</th></tr></thead>
+        <tbody>
+          <tr><td>완료</td><td>한도 조회가 끝났어요 <span style="color:#9298A8">/ 결과 화면으로 이동할게요</span></td></tr>
+          <tr><td>인포칩</td><td>한도 조회는 신용점수에 영향을 주지 않아요</td></tr>
+          <tr><td>이탈방지 제목</td><td>조회를 그만둘까요?</td></tr>
+          <tr><td>이탈방지 본문</td><td>지금 나가면 조회가 취소되고, 다음에 처음부터 다시 진행해야 해요. 조회 중에는 다른 화면을 봐도 계속 진행돼요.</td></tr>
+          <tr><td>이탈방지 버튼</td><td>그만두기 · 계속 조회하기</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 14 화면1 마크업 -->
+    <section id="s1-markup">
+      <h2>화면 1 · 한도조회중</h2>
+      <div class="h2sub">마크업 (정적 스켈레톤)</div>
+      <div class="code"><span class="lang">html</span><button class="copy">복사</button><pre>&lt;section class="screen loading"&gt;
+  &lt;header class="hdr"&gt;
+    &lt;button class="back" aria-label="이전"&gt;‹&lt;/button&gt;
+    &lt;h1 class="hdr-title"&gt;대출한도 조회&lt;/h1&gt;
+  &lt;/header&gt;
+
+  &lt;div class="loading-body"&gt;
+    &lt;img class="mascot" src="경로/mascot.gif" alt="한도 조회 중" width="150"&gt;
+    &lt;div class="dots"&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;p class="msg" aria-live="polite"&gt;한도 조회를 시작할게요&lt;/p&gt;
+    &lt;p class="msg-sub"&gt;보통 1분 안에 끝나요&lt;/p&gt;
+
+    &lt;div class="info-chip"&gt;
+      &lt;span class="ic"&gt;🛡&lt;/span&gt;
+      한도 조회는 신용점수에 영향을 주지 않아요
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;!-- 이탈 방지 바텀시트 --&gt;
+&lt;div class="dim"&gt;&lt;/div&gt;
+&lt;div class="sheet exit-sheet"&gt;
+  &lt;span class="handle"&gt;&lt;/span&gt;
+  &lt;h2&gt;조회를 그만둘까요?&lt;/h2&gt;
+  &lt;p&gt;지금 나가면 조회가 취소되고, 다음에 처음부터 다시 진행해야 해요.&lt;/p&gt;
+  &lt;div class="btns"&gt;
+    &lt;button class="ghost"&gt;그만두기&lt;/button&gt;
+    &lt;button class="primary"&gt;계속 조회하기&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+    </section>
+
+    <!-- 15 화면2 구조 -->
+    <section id="s2-structure">
+      <h2>화면 2 · 한도조회 결과</h2>
+      <div class="h2sub">구조 · 레이아웃</div>
+      <p class="lead">상품 선택 UX 화면. 히어로(최대 한도) → 추천 조합 트리거 → 정렬 → 상품 리스트 → 송금시간 안내 → 하단 동적 CTA. 오버레이로 추천 조합 시트 · 규제 확인 팝업 · 변경 토스트가 있습니다.</p>
+      <div class="anatomy">┌─ Screen (390 webview) ────────────┐
+│ Header (52)  "한도조회 결과"   취소 │
+│ ┌─ Scroll body (16 좌우) ────────┐ │
+│ │ Hero  최대 5,300만원까지 (18/800)│ │
+│ │ [✨ 추천 조합 보기 ›] (accent)  │ │
+│ │              금리순 | 한도순     │ │
+│ │ ProductCard ×7 (라디오, gap 11) │ │
+│ │ ⓘ 송금시간 안내 ▾ (아코디언)     │ │
+│ └───────────────────────────────┘ │
+│ CTA (하단 고정, 동적 라벨)          │
+└───────────────────────────────────┘
+  Overlay: 추천조합 시트 · 규제 팝업 · 토스트</div>
+    </section>
+
+    <!-- 16 화면2 데이터 -->
+    <section id="s2-data">
+      <h2>화면 2 · 한도조회 결과</h2>
+      <div class="h2sub">상품 데이터</div>
+      <table>
+        <thead><tr><th style="width:96px">id</th><th>이름</th><th style="width:64px">금리</th><th style="width:76px">한도</th><th style="width:80px">group</th><th style="width:120px">badge</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">sunshine</td><td><b>햇살론</b></td><td>9.8%</td><td>2,000만원</td><td>햇살론</td><td><span class="badge-reco">★추천★</span></td></tr>
+          <tr><td class="mono">sunshineSpec</td><td><b>햇살론특례</b></td><td>9.9%</td><td>1,000만원</td><td>햇살론</td><td>—</td></tr>
+          <tr><td class="mono">saidol</td><td><b>사잇돌2</b></td><td>11.8%</td><td>2,300만원</td><td>사잇돌2</td><td>—</td></tr>
+          <tr><td class="mono">saidolPlus</td><td><b>사잇돌2 + 참신한더드림론</b></td><td>11.8%</td><td>2,600만원</td><td>신용</td><td><span class="badge-new">NEW</span></td></tr>
+          <tr><td class="mono">credit</td><td><b>참신한대출</b></td><td>13.25%</td><td>390만원</td><td>신용</td><td>—</td></tr>
+          <tr><td class="mono">creditEx</td><td><b>참신한대출(대환)</b></td><td>13.25%</td><td>500만원</td><td>신용</td><td>—</td></tr>
+          <tr><td class="mono">lifeStable</td><td><b>신한저축 중금리 생활안정대출</b></td><td>15.6%</td><td>1,000만원</td><td>신용</td><td><span class="badge-life">생활안정</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note"><b>추천 조합</b> = 각 군 최대 한도 상품(크로스 충돌 고려). 햇살론(2,000) + 사잇돌2(2,300) + 생활안정대출(1,000) = <b>총 5,300만원</b>, 가중평균 금리 <b>연 11.76%</b>.<br>※ 신용군 최대는 saidolPlus(2,600)이나 사잇돌2와 <b>동시 진행 불가</b>하여 조합에서는 생활안정대출(1,000)로 대체됩니다.</div>
+    </section>
+
+    <!-- 17 화면2 컴포넌트 -->
+    <section id="s2-components">
+      <h2>화면 2 · 한도조회 결과</h2>
+      <div class="h2sub">컴포넌트</div>
+      <table>
+        <thead><tr><th style="width:160px">컴포넌트</th><th>사양</th></tr></thead>
+        <tbody>
+          <tr><td><b>ProductCard</b></td><td>radius 16 · 패딩 15 14 · 좌측 상품명(14/800)+금리·한도(값 15/700), 우측 라디오(22). 선택 시 bg #F6F8FF / border #B8CAFF / 라디오 채움 #5B8BF0. 배지 좌상단(추천/NEW/생활안정). <span class="flag p">React.memo</span> 성능 최적화 적용.</td></tr>
+          <tr><td><b>SortToggle</b></td><td>금리순 | 한도순. 활성 기준 텍스트 Primary + 하단 2px 밑줄. 활성 정렬 기준 값이 카드 내에서도 Primary로 강조.</td></tr>
+          <tr><td><b>추천 조합 트리거</b></td><td>Accent-soft 박스(radius 12) · "✨ 나에게 딱 맞는 추천 조합 보기" + 셰브론 ›. 탭 → 추천 조합 시트.</td></tr>
+          <tr><td><b>추천 조합 시트</b></td><td>바텀시트. 제목 19/800 + 안내. 3개 상품(연 금리·한도), 합계 한도/평균 금리(가중) 요약 박스(#F6F8FF). [이 조합으로 선택하기](Primary,800) / [직접 고를게요](ghost text).</td></tr>
+          <tr><td><b>규제 확인 팝업</b></td><td>바텀시트(핸들·상단 24·좌측 정렬 본문). 강조는 bold(#161B2E). [네, 이 상품으로 진행할게요](Primary outline) / [아니오, 다시 선택할게요](neutral outline).</td></tr>
+          <tr><td><b>Toast</b></td><td>하단 플로팅(bottom 80). 반투명(rgba(30,32,40,.92))·blur·방패 아이콘 + 변경 안내. .22s fade+up. 3.5s 자동 소멸.</td></tr>
+          <tr><td><b>송금시간 아코디언</b></td><td>상단 구분선 + "ⓘ 송금시간 안내" + 셰브론(180° 회전). max-height .3s. 4행 + 안내 문구.</td></tr>
+          <tr><td><b>CTA</b></td><td>하단 고정, 상단 페이드 마스크. 동적 라벨(아래 규칙). 미선택 시 비활성(#F1F3F5/#495057).</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 18 화면2 규칙 -->
+    <section id="s2-rules">
+      <h2>화면 2 · 한도조회 결과</h2>
+      <div class="h2sub">비즈니스 규칙</div>
+      <div class="kv">
+        <dt>① 그룹 배타 선택</dt><dd>그룹은 <b>햇살론 / 사잇돌2 / 신용</b> 3종. 같은 그룹 내 <b>1개만</b> 선택 가능 — 새 상품 선택 시 같은 그룹 기존 선택 자동 해제.</dd>
+        <dt>② 크로스 충돌</dt><dd><b>사잇돌2 + 참신한더드림론(신용군) ↔ 사잇돌2(사잇돌2군)</b>는 동시 진행 불가. 한쪽 선택 시 다른 쪽 자동 해제.</dd>
+        <dt>③ 변경 토스트</dt><dd>해제가 발생할 때만 노출. 다중 해제 지원. 문구: <code>"{선택상품}"은 "{해제A}", "{해제B}"과 동시 진행이 불가능하여 변경되었습니다.</code></dd>
+        <dt>④ 정렬</dt><dd>기본 <b>금리순</b>(rate 오름차순) / 한도순(amount 내림차순). 활성 기준 값 Primary 강조.</dd>
+        <dt>⑤ 가중평균 금리</dt><dd><code>Σ(rate×amount) / Σamount</code>, 소수 2자리 반올림, 0 나눗셈 가드.</dd>
+        <dt>⑥ 동적 CTA</dt><dd>0개 → 비활성 <b>"상품을 선택해 주세요"</b> · N개 → <b>"선택한 {N}개 상품 신청하기 (총 {X}만원)"</b>.</dd>
+        <dt>⑦ 규제 확인</dt><dd>CTA(≥1개) 탭 → 규제 확인 팝업(전문은 <a href="#copy">카피 인벤토리</a>).</dd>
+        <dt>⑧ 송금시간</dt><dd>햇살론 영업일 18:00 · 대환 포함 15:30 · 중금리 생활안정대출 21:30(일요일 제외) · 그 외 22:30까지 완료 시 당일 송금.</dd>
+      </div>
+    </section>
+
+    <!-- 19 화면2 마크업 -->
+    <section id="s2-markup">
+      <h2>화면 2 · 한도조회 결과</h2>
+      <div class="h2sub">마크업 (정적 스켈레톤)</div>
+      <div class="code"><span class="lang">html</span><button class="copy">복사</button><pre>&lt;section class="screen result"&gt;
+  &lt;header class="hdr"&gt;
+    &lt;h1&gt;한도조회 결과&lt;/h1&gt;
+    &lt;button class="cancel"&gt;취소&lt;/button&gt;
+  &lt;/header&gt;
+
+  &lt;div class="scroll"&gt;
+    &lt;h2 class="hero"&gt;최대 &lt;em&gt;5,300만원&lt;/em&gt;까지&lt;br&gt;신청할 수 있어요&lt;/h2&gt;
+
+    &lt;button class="reco-trigger"&gt;✨ 나에게 딱 맞는 추천 조합 보기 ›&lt;/button&gt;
+
+    &lt;div class="sort"&gt;
+      &lt;button class="on"&gt;금리순&lt;/button&gt; | &lt;button&gt;한도순&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;ul class="product-list"&gt;
+      &lt;li class="card selected"&gt;
+        &lt;span class="badge reco"&gt;★추천★&lt;/span&gt;
+        &lt;div class="info"&gt;
+          &lt;p class="name"&gt;햇살론&lt;/p&gt;
+          &lt;p class="meta"&gt;연 &lt;b&gt;9.8%&lt;/b&gt; · 최대 &lt;b&gt;2,000만원&lt;/b&gt;&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;span class="radio on"&gt;&lt;/span&gt;
+      &lt;/li&gt;
+      &lt;!-- …7개 상품(햇살론/햇살론특례/사잇돌2/사잇돌2+참신한더드림론/참신한대출/참신한대출(대환)/생활안정대출) --&gt;
+    &lt;/ul&gt;
+
+    &lt;details class="remit"&gt;&lt;summary&gt;ⓘ 송금시간 안내&lt;/summary&gt; …&lt;/details&gt;
+  &lt;/div&gt;
+
+  &lt;div class="cta-bar"&gt;
+    &lt;button class="cta" disabled&gt;상품을 선택해 주세요&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;!-- Overlay: 추천 조합 시트 / 규제 확인 팝업 / 토스트 --&gt;</pre></div>
+    </section>
+
+    <!-- 20 카피 인벤토리 -->
+    <section id="copy">
+      <h2>Reference</h2>
+      <div class="h2sub">카피 인벤토리</div>
+      <table>
+        <thead><tr><th style="width:170px">위치</th><th>문구</th></tr></thead>
+        <tbody>
+          <tr><td>결과 히어로</td><td>최대 5,300만원까지 / 신청할 수 있어요</td></tr>
+          <tr><td>추천 조합 트리거</td><td>✨ 나에게 딱 맞는 추천 조합 보기</td></tr>
+          <tr><td>추천 조합 시트 제목</td><td>최적상품 추천 조합</td></tr>
+          <tr><td>추천 조합 시트 안내</td><td>한도를 가장 크게 받을 수 있는 조합이에요. / 신청 전 각 상품 조건을 확인해 주세요.</td></tr>
+          <tr><td>추천 조합 요약</td><td>합계 한도 최대 5,300만원 · 평균 금리(가중금리) 연 11.76%</td></tr>
+          <tr><td>추천 조합 버튼</td><td>이 조합으로 선택하기 · 직접 고를게요</td></tr>
+          <tr><td>정렬</td><td>금리순 · 한도순</td></tr>
+          <tr><td>CTA (미선택)</td><td>상품을 선택해 주세요</td></tr>
+          <tr><td>CTA (선택)</td><td>선택한 {N}개 상품 신청하기 (총 {X}만원)</td></tr>
+          <tr><td>변경 토스트</td><td>"{선택상품}"은 "{해제상품}"과 동시 진행이 불가능하여 변경되었습니다.</td></tr>
+          <tr><td>규제 팝업 제목</td><td>신청 전 꼭 확인해주세요.</td></tr>
+          <tr><td>규제 팝업 본문 ①</td><td>본 상품은 <b>중금리 생활안정대출</b>이에요.</td></tr>
+          <tr><td>규제 팝업 본문 ②</td><td>대출 실행일부터 <b>투기지역, 투기과열지구, 조정대상지역 내 주택(분양권 및 조합원 입주권 포함)을 구입하실 수 없어요.</b></td></tr>
+          <tr><td>규제 팝업 본문 ③ <span class="flag s">확정 필요</span></td><td>프로토타입에 예시 텍스트로 표기됨 — <b>기한이익 상실 등 최종 법무 카피 확정 필요</b>.</td></tr>
+          <tr><td>규제 팝업 질문</td><td>이 상품으로 진행하시겠어요?</td></tr>
+          <tr><td>규제 팝업 버튼</td><td>네, 이 상품으로 진행할게요 · 아니오, 다시 선택할게요</td></tr>
+          <tr><td>송금시간 안내</td><td>햇살론 영업일 18:00까지 · 대환 포함 상품 영업일 15:30까지 · 중금리 생활안정대출 21:30까지(일요일 제외) · 그 외 상품 22:30까지 / 위 시간까지 모든 절차를 완료하시면 당일 송금됩니다.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 21 QA -->
+    <section id="qa">
+      <h2>Reference</h2>
+      <div class="h2sub">접근성 · QA 체크</div>
+      <div class="split">
+        <div class="panel">
+          <h4>접근성</h4>
+          <ul class="tick">
+            <li>로딩 메시지 영역 <code>aria-live="polite"</code>로 화면 낭독 지원.</li>
+            <li>딤(dim)은 클릭 시 닫히는 버튼 역할 — <code>role="button"</code> · <code>aria-label</code> · <code>tabindex="0"</code> 부여.</li>
+            <li>라디오 선택 상태는 색뿐 아니라 채움 도트로도 구분(색맹 대응).</li>
+            <li>배지(추천/NEW/생활안정)는 색 외 텍스트 라벨 병행.</li>
+            <li>포커스 이동/키보드로 카드 선택·시트 닫기 가능.</li>
+          </ul>
         </div>
-        <div class="control-row">
-          <span class="control-label">⚡ 심사 케이스:</span>
-          <div class="condition-selector" id="conditionSelector">
-            <button type="button" data-cond="single">1. 단건 노출 (참신한500)</button>
-            <button type="button" class="active" data-cond="all">2. 다건 노출 (전체 6종 복합)</button>
-          </div>
+        <div class="panel">
+          <h4>QA 체크</h4>
+          <ul class="tick">
+            <li>그룹 배타 + 크로스 충돌(사잇돌2 ↔ 사잇돌2+참신한더드림론) 동작·토스트 확인.</li>
+            <li>가중평균 금리 = 11.76%(5,300만원 조합) 일치.</li>
+            <li>동적 CTA 라벨/활성화 상태 정확.</li>
+            <li>오버레이 z-index 순서: 토스트 &gt; 규제팝업 &gt; 추천시트 &gt; 딤.</li>
+            <li>하단 CTA·헤더 고정, 본문만 스크롤.</li>
+            <li>마스코트 GIF — <code>reduced-motion</code> 시 정지 프레임 대체.</li>
+            <li>금액 천단위 콤마(<code>toLocaleString</code>).</li>
+            <li>한글 헤드라인 <code>word-break:keep-all</code> · 긴 문자열 <code>overflow-wrap:break-word</code> 병행.</li>
+          </ul>
         </div>
       </div>
+    </section>
 
-      <div class="stagecap" id="cap">AS-IS 현행 화면 모드</div>
-
-      <div class="deck">
-        <div class="phone" id="phoneWrapper">
-          <div class="phone__screen">
-            <div class="phone__bar"></div>
-            
-            <div class="device-view is-active" data-view="asis">
-              <div class="scr">
-                <div class="phone-gnb">
-                  <div class="phone-gnb__title">한도조회 결과</div>
-                  <div class="phone-gnb__action">취소</div>
-                </div>
-
-                <div class="scr__body" id="asisScrollBody" style="background:#FAFAFB;">
-                  <div class="as-recommend-zone" id="asRecommendZone">
-                    <div class="as-top-indicator">
-                      <span class="as-star">★</span> <b>최적상품추천</b>
-                    </div>
-                    <div class="as-summary-box">
-                      <div class="as-summary-box__title as-sum-headline">최대 <b id="asSumTotal">2,690만원까지</b> 신청 가능해요</div>
-                      <div id="asSummaryList"></div>
-                      <button type="button" class="as-quick-btn" id="asQuickBtn">한번에 신청</button>
-                    </div>
-                  </div>
-                  
-                  <div class="as-title-label" id="asMainTitle">원하는 상품을 선택해 주세요.</div>
-                  <div class="as-tabs" id="asTabsRow">
-                    <button class="on">금리낮은순</button>
-                    <button>한도높은순</button>
-                  </div>
-                  <div id="asCardsContainer"></div>
-                  <div class="as-notice">
-                    <div class="as-notice-h">ⓘ 송금시간 안내</div>
-                    <div class="as-notice-b">• 당일 모든 절차 완료 시 즉시 송금 처리됩니다.</div>
-                  </div>
-                </div>
-                <div class="scr__btnwrap" style="background:#FAFAFB;">
-                  <button class="scr__cta asis-style" id="asCtaBtn">상품 선택</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="device-view" data-view="toss">
-              <div class="scr">
-                <div class="scr__body" id="tossScrollBody">
-                  <div class="toss-head">대출 신청할 상품을<br>선택해주세요</div>
-                  <div class="toss-sub" id="tossSubTitle">원하는 상품을 선택해 주세요.</div>
-                  <div id="tossCardsContainer"></div>
-                  <div class="toss-brand-text">이 화면은 신한저축은행 화면입니다</div>
-                </div>
-                <div class="scr__btnwrap">
-                  <button class="scr__cta" id="tossCtaBtn" style="border-radius:14px;">선택하기</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="device-view" data-view="tobe">
-              <div class="scr">
-                <div class="phone-gnb">
-                  <div class="phone-gnb__title">한도조회 결과</div>
-                  <div class="phone-gnb__action">취소</div>
-                </div>
-
-                <div class="scr__body" id="tobeScrollBody">
-                  <div class="tb-header-wrap">
-                    <div class="tb-main-title">최대 <b>1,800만원</b>까지 신청할 수 있어요</div>
-                    <p class="tb-sub-title" id="tbDynamicSub">원하는 상품을 선택해 주세요.</p>
-                  </div>
-
-                  <div class="g-sec" id="tbPolicySection">
-                    <div class="g-head">
-                      <div class="g-head-main">
-                        <span class="g-title">정책서민금융</span>
-                        <div class="tb-sort-select-wrapper">
-                          <select class="tb-sort-select" id="sortSelect" aria-label="정렬 기준">
-                            <option value="rate">금리순</option>
-                            <option value="amount">한도순</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="g-cards-wrapper" id="tbPolicyWrapper"></div>
-                  </div>
-
-                  <div class="g-sec" id="tbCreditSection">
-                    <div class="g-head">
-                      <div class="g-head-main"><span class="g-title">신용대출</span></div>
-                      <div class="g-warn-container" id="warnContainer">
-                        <div class="g-warn-msg">사잇돌2+참신한더드림론 선택시 신용대출은 추가로 고를 수 없어요.</div>
-                        <button type="button" class="g-unlock-btn" id="btnUnlockCredit">대출 조건 초기화</button>
-                      </div>
-                    </div>
-                    <div class="g-cards-wrapper" id="tbCreditWrapper"></div>
-                  </div>
-                </div>
-                
-                <div class="scr__btnwrap">
-                  <button type="button" class="tb-quick-chip" id="quickChipTrigger">추천상품 한번에 신청</button>
-                  <button class="scr__cta" id="tbCtaBtn" disabled>선택한 상품 신청하기</button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="side-panel" style="margin-top: 54px;">
-    
-    <div class="info-card">
-      <div class="info-card__title">
-        <span class="info-card__title-text">📋 UI/UX Functional Spec</span>
-        <button type="button" class="btn-sm" id="btnEditDesc">편집 모드</button>
-      </div>
-      <div id="descContainer">
-        <div class="info-card__desc" id="dynamicDescription"></div>
-      </div>
-      <div id="descEditorWrapper" style="display:none;">
-        <textarea class="desc-textarea" id="txDescEditor"></textarea>
-        <div class="desc-btn-wrap">
-          <button type="button" class="btn-sm" id="btnCancelDesc">취소</button>
-          <button type="button" class="btn-sm primary" id="btnSaveDesc">적용하기</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="info-card__title">
-        <span class="info-card__title-text">💬 실무자 코멘트 등록 피드</span>
-      </div>
-      <div class="history-form" style="grid-template-columns: 80px 1fr; margin-bottom: 6px;">
-        <input type="text" id="cmtUser" placeholder="이름/직책" />
-        <input type="text" id="cmtText" placeholder="전달 보완 사항이나 피드백을 등록하세요." />
-      </div>
-      <div style="text-align:right; margin-bottom: 8px;">
-        <button type="button" class="btn-sm primary" id="btnAddComment">코멘트 등록</button>
-      </div>
-      <div class="comment-list" id="commentListWrapper"></div>
-    </div>
-
-    <div class="info-card">
-      <div class="info-card__title">
-        <span class="info-card__title-text">🕒 Storyboard Change History</span>
-      </div>
-      <div class="history-form">
-        <select id="formType">
-          <option value="TO-BE">TO-BE</option>
-          <option value="AS-IS">AS-IS</option>
-          <option value="공통">공통</option>
-        </select>
-        <input type="text" id="formUser" placeholder="작성자(기획)" />
-        <input type="text" id="formText" placeholder="수정 보완 내역 기술" />
-      </div>
-      <div style="text-align:right; margin-bottom: 10px;">
-        <button type="button" class="btn-sm primary" id="btnAddHistory">+ 이력 추가</button>
-      </div>
-      <div style="overflow-x:auto;">
-        <table class="history-table" id="historyTable">
-          <thead>
-            <tr>
-              <th style="width:70px;">버전/일자</th>
-              <th style="width:65px;">구분</th>
-              <th>수정 명세 요약</th>
-              <th style="width:80px; text-align:center;">관리</th>
-            </tr>
-          </thead>
-          <tbody id="historyTbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
+    <footer>
+      대출한도 조회 · TO-BE 퍼블리싱 핸드오프 · 브라우저 인쇄(⌘/Ctrl+P)로 PDF 저장 가능 · 값 변경 시 원본 프로토타입 기준으로 갱신하세요.
+    </footer>
+  </main>
 </div>
 
 <script>
-(function(){
-  const products = [
-    { id:"sunshine", name:"햇살론", rate:9.8, amount:2000, type:"policy", group:"sunshine" },
-    { id:"sunshineSpecial", name:"햇살론특례", rate:12.5, amount:1000, type:"policy", group:"sunshine" },
-    { id:"saidol", name:"사잇돌2", rate:11.8, amount:2300, type:"policy", group:"saidol" },
-    { id:"conflict", name:"사잇돌2 + 참신한더드림론", rate:11.8, amount:2600, type:"policy", group:"saidol", isConflict:true },
-    { id:"creditPure", name:"참신한대출", rate:17.25, amount:390, type:"credit", group:"credit-pure" },
-    { id:"creditExchange", name:"참신한대출(대환)", rate:17.25, amount:5000, type:"credit", group:"credit-pure" },
-    { id:"credit500", name:"참신한500", rate:19.0, amount:800, type:"credit", group:"credit-500" }
-  ];
-
-  const cases = {
-    single: ["credit500"],
-    all: ["sunshine", "sunshineSpecial", "saidol", "conflict", "creditPure", "creditExchange"]
-  };
-
-  const defaultHistory = [
-    { id: 1, ver: "v1.0", date: "2026-06-22", type: "TO-BE", user: "라니대리", text: "한도조회 결과 v1 기획서 마스터 깃허프에서 버전 빌드 완료." }
-  ];
-
-  const defaultComments = [
-    { id: 1, user: "라니프로", text: "가로 380px 세로아주길게 했습니다.ㅎㅎ." },
-    { id: 2, user: "라니대리", text: "참신한더드림론 결합 케이스 진입 시, 사잇돌2 한도가 차감되어 계산되는 예외 산출 로직 반영 예정입니다." }
-  ];
-
-  const defaultDescriptions = {
-    asis: "<strong>[AS-IS 현행 분석 요건]</strong><br>• 상단 최적상품추천 내부 '한번에 신청' 클릭 시 고정 시뮬레이션 그룹값이 매핑됩니다.",
-    toss: "<strong>[벤치마킹 분석]</strong><br>• 피드형 구조로 각 카드 터치 시 배경 면 분할 색상이 활성화됩니다.",
-    tobe: "<strong>[TO-BE 핵심 개편안 검증 요건]</strong><br>• <b>GNB 중앙 정렬 헤더:</b> 상단에 가운데 정렬 타이틀과 취소 액션 버튼 셋을 고정 선언했습니다.<br>• <b>타이틀 통합 보장:</b> 단건/다건 조건에 관계없이 다건 기준의 압축 1줄 타이틀 구조셋을 동일 표출합니다.<br>• <b>최대한도 합산 공식:</b> 햇살론군 한도 MAX + 사잇돌군 한도 MAX + 신용군 한도 MAX 합산 로직을 적용합니다.<br>• <b>차감 예외 규칙 정의:</b> 사잇돌2+참신한더드림론 결합 상품군 진입 시, 더드림론은 사잇돌2 한도가 선차감된 잔여 한도이며 '신용군' 레이어에 귀속 처리됩니다."
-  };
-
-  let historyData = JSON.parse(localStorage.getItem('sh_history')) || defaultHistory;
-  let commentData = JSON.parse(localStorage.getItem('sh_comments')) || defaultComments;
-  let descriptionMap = JSON.parse(localStorage.getItem('sh_descriptions')) || defaultDescriptions;
-
-  let activeCase = 'all';
-  let activeView = 'asis';
-  let globalSelection = {};
-  let isEditMode = false;
-
-  function updateDynamicDescription() {
-    const descEl = document.getElementById('dynamicDescription');
-    const txEditor = document.getElementById('txDescEditor');
-    if(descEl && !isEditMode) {
-      let suffix = `<br><br><span style='color:var(--c-accent-warn); font-weight:700;'>⚡현재 심사 조건: ${activeCase === 'single' ? '1. 단건 노출 모드 (참신한500)' : '2. 다건 복합 노출 모드'}</span>`;
-      descEl.innerHTML = descriptionMap[activeView] + suffix;
-      txEditor.value = descriptionMap[activeView].replace(/<br>/g, "\n");
-    }
-  }
-
-  function renderAllScreens() {
-    const allowedIds = cases[activeCase];
-    const currentProducts = products.filter(p => allowedIds.includes(p.id));
-    const phoneWrapper = document.getElementById('phoneWrapper');
-    const tbSub = document.getElementById('tbDynamicSub');
-    const asTitle = document.getElementById('asMainTitle');
-    const tossSub = document.getElementById('tossSubTitle');
-    
-    const asRecommendZone = document.getElementById('asRecommendZone');
-    const asTabsRow = document.getElementById('asTabsRow');
-    
-    const tbPolicySec = document.getElementById('tbPolicySection');
-    const tbCreditSec = document.getElementById('tbCreditSection');
-    const quickChip = document.getElementById('quickChipTrigger');
-
-    if (activeCase === 'single') {
-      phoneWrapper.classList.add('mode-single');
-      const msg = '원하는 상품을 선택해 주세요.';
-      tbSub.textContent = msg; asTitle.textContent = '신청할 상품을 선택해 주세요.'; tossSub.textContent = '신청할 상품을 선택해 주세요.';
-      asRecommendZone.style.display = 'none';
-      asTabsRow.style.display = 'none';
-      tbPolicySec.classList.add('hide-header');
-      tbCreditSec.classList.add('hide-header');
-      tbPolicySec.style.display = 'none';
-      quickChip.classList.add('is-hidden-btn');
-    } else {
-      phoneWrapper.classList.remove('mode-single');
-      const msg = '원하는 상품을 선택해 주세요.';
-      tbSub.textContent = msg; asTitle.textContent = msg; tossSub.textContent = msg;
-      asRecommendZone.style.display = 'block';
-      asTabsRow.style.display = 'grid';
-      tbPolicySec.classList.remove('hide-header');
-      tbCreditSec.classList.remove('hide-header');
-      tbPolicySec.style.display = 'block';
-    }
-
-    const asSummaryList = document.getElementById('asSummaryList');
-    const asSumTotal = document.getElementById('asSumTotal');
-    asSummaryList.innerHTML = '';
-    let summaryItems = (activeCase === 'all') ? [products.find(p=>p.id==="saidol"), products.find(p=>p.id==="creditPure")] : currentProducts;
-    let totalAmt = 0;
-    summaryItems.forEach(p => {
-      totalAmt += p.amount;
-      asSummaryList.innerHTML += `
-        <div class="as-sum-row">
-          <span class="name">${p.name}</span>
-          <span class="divider-line"></span>
-          <span class="rate">${p.rate}%</span>
-          <span class="val">${p.amount.toLocaleString()}만원</span>
-        </div>`;
+  // hex 클릭 복사
+  document.querySelectorAll('.sw .hex').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const t=el.textContent.trim();
+      navigator.clipboard?.writeText(t);
+      const old=el.textContent; el.textContent='복사됨 ✓';
+      setTimeout(()=>el.textContent=old,900);
     });
-    asSumTotal.textContent = `${totalAmt.toLocaleString()}만원까지`;
-
-    const asCardsWrap = document.getElementById('asCardsContainer');
-    const tossCardsWrap = document.getElementById('tossCardsContainer');
-    const tbPolicyWrapper = document.getElementById('tbPolicyWrapper');
-    const tbCreditWrapper = document.getElementById('tbCreditWrapper');
-    
-    asCardsWrap.innerHTML = ''; tossCardsWrap.innerHTML = '';
-    tbPolicyWrapper.innerHTML = ''; tbCreditWrapper.innerHTML = '';
-
-    currentProducts.forEach(p => {
-      const isSel = globalSelection[p.id] ? 'sel' : '';
-      
-      asCardsWrap.innerHTML += `
-        <div class="as-card ${isSel}" data-id="${p.id}" id="target-as-${p.id}">
-          <div class="as-cardname">${p.name}</div>
-          <div class="as-cardmeta"><span class="lbl">금리</span> <b>${p.rate}%</b> &nbsp;&nbsp; <span class="lbl">최대</span> <b>${p.amount.toLocaleString()}만원</b></div>
-          <span class="as-circle"></span>
-        </div>`;
-
-      tossCardsWrap.innerHTML += `
-        <div class="toss-card ${isSel}" data-id="${p.id}" id="target-toss-${p.id}">
-          <div class="toss-cname">${p.name}</div>
-          <div class="toss-cfig">${p.rate}%<span>·</span>${p.amount.toLocaleString()}만원</div>
-        </div>`;
-
-      let badgeHtml = p.id === 'conflict' ? `<div class="tb-new-badge">NEW</div>` : '';
-      let hasBadgeClass = p.id === 'conflict' ? 'has-badge' : '';
-
-      const tobeCardHtml = `
-        <div class="as-card ${isSel} ${hasBadgeClass}" data-type="${p.type}-card" data-group="${p.group}" data-id="${p.id}" data-rate="${p.rate}" data-amount="${p.amount}" id="target-tb-${p.id}">
-          ${badgeHtml}
-          <div class="as-cardname">${p.name}</div>
-          <div class="as-cardmeta"><span class="lbl">금리</span> <b style="color:var(--c-primary); font-size:13px;">연 ${p.rate}%</b> &nbsp;&nbsp; <span class="lbl">한도</span> <b>최대 ${p.amount.toLocaleString()}만원</b></div>
-          <span class="g-pick-marker"></span>
-        </div>`;
-
-      if(p.type === 'policy') tbPolicyWrapper.innerHTML += tobeCardHtml;
-      else tbCreditWrapper.innerHTML += tobeCardHtml;
+  });
+  // 코드 복사
+  document.querySelectorAll('.code .copy').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const pre=btn.parentElement.querySelector('pre');
+      navigator.clipboard?.writeText(pre.innerText);
+      btn.textContent='복사됨'; btn.classList.add('ok');
+      setTimeout(()=>{btn.textContent='복사';btn.classList.remove('ok');},1100);
     });
-
-    bindCoreEvents();
-    syncCtaButtons();
-    executeSortLogic();
-    updateDynamicDescription();
-  }
-
-  function bindCoreEvents() {
-    function toggleProductSelection(id) {
-      const p = products.find(prod => prod.id === id);
-      const targetState = !globalSelection[id];
-
-      if (targetState) {
-        products.forEach(prod => {
-          if (prod.group === p.group && prod.id !== id) {
-            globalSelection[prod.id] = false;
-          }
-        });
-        globalSelection[id] = true;
-      } else {
-        globalSelection[id] = false;
-      }
-
-      if (activeCase === 'all' && globalSelection['conflict']) {
-        globalSelection['creditPure'] = false;
-        globalSelection['creditExchange'] = false;
-      }
-      renderAllScreens();
-    }
-
-    document.querySelectorAll('.device-view[data-view="asis"] .as-card').forEach(card => {
-      card.addEventListener('click', () => toggleProductSelection(card.dataset.id));
-    });
-    document.querySelectorAll('.toss-card').forEach(card => {
-      card.addEventListener('click', () => toggleProductSelection(card.dataset.id));
-    });
-    document.querySelectorAll('.device-view[data-view="tobe"] .as-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        const creditWrapper = document.getElementById('tbCreditWrapper');
-        if(card.closest('#tbCreditWrapper') && creditWrapper.classList.contains('blocked-zone')) {
-          e.stopPropagation(); return;
-        }
-        toggleProductSelection(card.dataset.id);
-      });
-    });
-  }
-
-  function syncCtaButtons() {
-    const selectedIds = Object.keys(globalSelection).filter(key => globalSelection[key]);
-    const cnt = selectedIds.length;
-    
-    document.getElementById('asCtaBtn').classList.toggle('is-ready', cnt > 0);
-    document.getElementById('asCtaBtn').textContent = cnt > 0 ? '대출 신청하기' : '상품 선택';
-    document.getElementById('tossCtaBtn').classList.toggle('is-ready', cnt > 0);
-    
-    const tbCta = document.getElementById('tbCtaBtn');
-    const creditWrapper = document.getElementById('tbCreditWrapper');
-    const warnContainer = document.getElementById('warnContainer');
-    const quickChip = document.getElementById('quickChipTrigger');
-
-    if (globalSelection['conflict'] && activeCase === 'all') {
-      creditWrapper.classList.add('blocked-zone');
-      warnContainer.style.display = 'block';
-    } else {
-      creditWrapper.classList.remove('blocked-zone');
-      warnContainer.style.display = 'none';
-    }
-
-    if (activeCase === 'single' || cnt > 0) {
-      quickChip.classList.add('is-hidden-btn');
-    } else {
-      quickChip.classList.remove('is-hidden-btn');
-    }
-
-    if (cnt === 0) {
-      tbCta.disabled = true;
-      tbCta.classList.remove('is-ready');
-      tbCta.textContent = '선택한 상품 신청하기';
-    } else {
-      tbCta.disabled = false;
-      tbCta.classList.add('is-ready');
-      let sumAmt = 0;
-      selectedIds.forEach(id => {
-        const prod = products.find(p => p.id === id);
-        if(prod) sumAmt += prod.amount;
-      });
-      tbCta.textContent = `선택한 ${cnt}개 상품 신청하기 (총 ${sumAmt.toLocaleString()}만원)`;
-    }
-  }
-
-  function executeSortLogic() {
-    const sortSelect = document.getElementById('sortSelect');
-    if (!sortSelect || activeCase === 'single' || activeView !== 'tobe') return;
-
-    const sortType = sortSelect.value;
-    const sortContainer = (wrapperElement) => {
-      const cards = Array.from(wrapperElement.querySelectorAll('.as-card'));
-      if (cards.length === 0) return;
-      cards.sort((a, b) => {
-        if (sortType === 'rate') {
-          return parseFloat(a.dataset.rate) - parseFloat(b.dataset.rate);
-        } else {
-          return parseInt(b.dataset.amount) - parseInt(a.dataset.amount);
-        }
-      });
-      cards.forEach(card => wrapperElement.appendChild(card));
-    };
-
-    sortContainer(document.getElementById('tbPolicyWrapper'));
-    sortContainer(document.getElementById('tbCreditWrapper'));
-  }
-
-  document.getElementById('sortSelect').addEventListener('change', executeSortLogic);
-
-  document.getElementById('asQuickBtn').addEventListener('click', () => {
-    globalSelection = {};
-    if (activeCase === 'all') {
-      globalSelection['saidol'] = true;
-      globalSelection['creditPure'] = true;
-      renderAllScreens();
-    } else {
-      globalSelection['credit500'] = true;
-      renderAllScreens();
-    }
   });
-
-  // ⭐️ 하단 '최적상품추천조합 한번에 선택' 버튼 클릭 이벤트 교정 완료
-  document.getElementById('quickChipTrigger').addEventListener('click', (e) => {
-    e.stopPropagation();
-    globalSelection = {};
-    if(activeCase === 'all') {
-      globalSelection['sunshine'] = true;
-      globalSelection['saidol'] = true;
-      globalSelection['creditPure'] = true;
-      renderAllScreens();
-    }
-  });
-
-  const viewSelector = document.getElementById('viewSelector');
-  const caps = { asis: 'AS-IS 현행 화면 모드', toss: '토스웹뷰토모드', tobe: 'TO-BE 개편안 검증 모드' };
-  
-  if(viewSelector) {
-    viewSelector.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        viewSelector.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeView = btn.dataset.view;
-        document.getElementById('cap').textContent = caps[activeView];
-        document.querySelectorAll('.phone .device-view').forEach(view => {
-          view.classList.toggle('is-active', view.dataset.view === activeView);
-        });
-        renderAllScreens();
-      });
-    });
-  }
-
-  const conditionSelector = document.getElementById('conditionSelector');
-  if(conditionSelector) {
-    conditionSelector.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        conditionSelector.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeCase = btn.dataset.cond;
-        globalSelection = {};
-        renderAllScreens();
-      });
-    });
-  }
-
-  document.getElementById('btnUnlockCredit').addEventListener('click', (e) => {
-    e.stopPropagation();
-    globalSelection['conflict'] = false;
-    renderAllScreens();
-  });
-
-  const btnEditDesc = document.getElementById('btnEditDesc');
-  const descContainer = document.getElementById('descContainer');
-  const descEditorWrapper = document.getElementById('descEditorWrapper');
-  const txDescEditor = document.getElementById('txDescEditor');
-  const btnCancelDesc = document.getElementById('btnCancelDesc');
-  const btnSaveDesc = document.getElementById('btnSaveDesc');
-
-  btnEditDesc.addEventListener('click', () => {
-    isEditMode = true;
-    descContainer.style.display = 'none';
-    descEditorWrapper.style.display = 'block';
-    btnEditDesc.style.display = 'none';
-  });
-
-  btnCancelDesc.addEventListener('click', () => {
-    isEditMode = false;
-    descContainer.style.display = 'block';
-    descEditorWrapper.style.display = 'none';
-    btnEditDesc.style.display = 'inline-block';
-    updateDynamicDescription();
-  });
-
-  btnSaveDesc.addEventListener('click', () => {
-    isEditMode = false;
-    descriptionMap[activeView] = txDescEditor.value.replace(/\n/g, "<br>");
-    localStorage.setItem('sh_descriptions', JSON.stringify(descriptionMap)); 
-    descContainer.style.display = 'block';
-    descEditorWrapper.style.display = 'none';
-    btnEditDesc.style.display = 'inline-block';
-    updateDynamicDescription();
-  });
-
-  const commentListWrapper = document.getElementById('commentListWrapper');
-  const btnAddComment = document.getElementById('btnAddComment');
-
-  function renderCommentList() {
-    commentListWrapper.innerHTML = '';
-    if(commentData.length === 0) {
-      commentListWrapper.innerHTML = '<div style="font-size:11.5px; color:var(--c-text-muted); text-align:center; padding:10px;">등록된 코멘트가 없습니다.</div>';
-      return;
-    }
-    commentData.forEach(item => {
-      commentListWrapper.innerHTML += `
-        <div class="comment-item" id="cmt-item-${item.id}">
-          <div class="comment-meta">
-            <span>👤 ${item.user}</span>
-            <span class="comment-del" onclick="window.deleteCommentRow(${item.id})">삭제 ✕</span>
-          </div>
-          <div>${item.text}</div>
-        </div>
-      `;
-    });
-  }
-
-  btnAddComment.addEventListener('click', () => {
-    const user = document.getElementById('cmtUser').value.trim() || "기획자";
-    const text = document.getElementById('cmtText').value.trim();
-    if(!text) return;
-
-    commentData.unshift({ id: Date.now(), user: user, text: text });
-    localStorage.setItem('sh_comments', JSON.stringify(commentData)); 
-    document.getElementById('cmtText').value = '';
-    renderCommentList();
-  });
-
-  window.deleteCommentRow = function(id) {
-    commentData = commentData.filter(item => item.id !== id);
-    localStorage.setItem('sh_comments', JSON.stringify(commentData)); 
-    renderCommentList();
-  };
-
-  const historyTbody = document.getElementById('historyTbody');
-  const btnAddHistory = document.getElementById('btnAddHistory');
-
-  function renderHistoryTable() {
-    historyTbody.innerHTML = '';
-    historyData.forEach((item) => {
-      const badgeClass = item.type === 'TO-BE' ? 'badge-v tobe' : 'badge-v';
-      historyTbody.innerHTML += `
-        <tr id="hist-row-${item.id}">
-          <td><strong>${item.ver}</strong><br><small style="color:var(--c-text-muted);">${item.date}</small></td>
-          <td><span class="${badgeClass}">${item.type}</span><br><small style="font-weight:700; color:var(--c-primary);">${item.user}</small></td>
-          <td>
-            <div class="view-text" id="hist-text-view-${item.id}">${item.text}</div>
-            <input type="text" class="edit-input" id="hist-input-edit-${item.id}" value="${item.text}" style="display:none; width:100%; border:1px solid var(--c-primary); padding:4px; font-size:11px;" />
-          </td>
-          <td style="text-align:center;">
-            <div id="hist-btn-group-view-${item.id}">
-              <button type="button" class="btn-sm" onclick="window.editHistoryRow(${item.id})" style="padding:2px 5px; font-size:10px; margin-bottom:2px;">수정</button>
-              <button type="button" class="btn-sm danger" onclick="window.deleteHistoryRow(${item.id})" style="padding:2px 5px; font-size:10px;">삭제</button>
-            </div>
-            <div id="hist-btn-group-edit-${item.id}" style="display:none;">
-              <button type="button" class="btn-sm primary" onclick="window.saveHistoryRow(${item.id})" style="padding:2px 5px; font-size:10px; margin-bottom:2px;">완료</button>
-              <button type="button" class="btn-sm" onclick="window.cancelEditRow(${item.id})" style="padding:2px 5px; font-size:10px;">취소</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    });
-  }
-
-  btnAddHistory.addEventListener('click', () => {
-    const type = document.getElementById('formType').value;
-    const user = document.getElementById('formUser').value.trim() || "기획";
-    const text = document.getElementById('formText').value.trim();
-    
-    if(!text) return;
-    const today = new Date().toISOString().split('T')[0];
-    let nextVer = "v1.1";
-    if(historyData.length > 0) {
-      const lastVerNum = parseFloat(historyData[0].ver.replace('v', ''));
-      if(!isNaN(lastVerNum)) nextVer = "v" + (lastVerNum + 0.1).toFixed(1);
-    }
-
-    historyData.unshift({ id: Date.now(), ver: nextVer, date: today, type: type, user: user, text: text });
-    localStorage.setItem('sh_history', JSON.stringify(historyData)); 
-    document.getElementById('formText').value = '';
-    renderHistoryTable();
-  });
-
-  window.deleteHistoryRow = function(id) {
-    if(confirm("이력을 삭제하시겠습니까?")) {
-      historyData = historyData.filter(item => item.id !== id);
-      localStorage.setItem('sh_history', JSON.stringify(historyData));
-      renderHistoryTable();
-    }
-  };
-
-  window.editHistoryRow = function(id) {
-    document.getElementById(`hist-text-view-${id}`).style.display = 'none';
-    document.getElementById(`hist-input-edit-${id}`).style.display = 'block';
-    document.getElementById(`hist-btn-group-view-${id}`).style.display = 'none';
-    document.getElementById(`hist-btn-group-edit-${id}`).style.display = 'block';
-  };
-
-  window.cancelEditRow = function(id) {
-    document.getElementById(`hist-text-view-${id}`).style.display = 'block';
-    document.getElementById(`hist-input-edit-${id}`).style.display = 'none';
-    document.getElementById(`hist-btn-group-view-${id}`).style.display = 'block';
-    document.getElementById(`hist-btn-group-edit-${id}`).style.display = 'none';
-  };
-
-  window.saveHistoryRow = function(id) {
-    const editVal = document.getElementById(`hist-input-edit-${id}`).value.trim();
-    if(!editVal) return;
-    const item = historyData.find(h => h.id === id);
-    if(item) item.text = editVal;
-    localStorage.setItem('sh_history', JSON.stringify(historyData)); 
-    renderHistoryTable();
-  };
-
-  document.getElementById('btnClearStorage').addEventListener('click', () => {
-    if(confirm("등록건 모두 초기화해드릴까요??")) {
-      localStorage.removeItem('sh_history');
-      localStorage.removeItem('sh_comments');
-      localStorage.removeItem('sh_descriptions');
-      window.location.reload();
-    }
-  });
-
-  renderCommentList();
-  renderHistoryTable();
-  renderAllScreens();
-})();
 </script>
 </body>
 </html>
