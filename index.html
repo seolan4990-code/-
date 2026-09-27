@@ -1450,6 +1450,11 @@ react/cjs/react-jsx-runtime.production.min.js:
   .diff { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
   .diff li { display: grid; grid-template-columns: 76px 1fr; gap: 10px; font-size: 13px; word-break: keep-all; }
   .diff .k { font-size: 12px; font-weight: 700; color: var(--accent); padding-top: 1px; }
+  .flow { margin: 0; padding: 0; list-style: none; counter-reset: fl; display: flex; flex-direction: column; gap: 8px; }
+  .flow li { counter-increment: fl; display: grid; grid-template-columns: 22px 64px 1fr; gap: 8px; font-size: 13px; word-break: keep-all; }
+  .flow li::before { content: counter(fl); width: 20px; height: 20px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; font-family: var(--mono); display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .flow .k { font-size: 12px; font-weight: 700; color: var(--accent); padding-top: 1px; }
+  @media (max-width: 520px) { .flow li { grid-template-columns: 22px 1fr; } .flow li &gt; span:last-child { grid-column: 2; } }
   .flag { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 10px; background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent); }
   .flag b { font-size: 12.5px; color: var(--warn); }
   .flag ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink); word-break: keep-all; }
@@ -1560,6 +1565,12 @@ react/cjs/react-jsx-runtime.production.min.js:
 .ln-two__opt[aria-checked=&quot;true&quot;] { background: var(--ln-primary-soft); border-color: var(--ln-primary); font-weight: 700; color: var(--ln-primary); }
 
 
+/* (공통) 인지세 안내 — 상품 한도가 5,000만원 이상일 때만 노출 · ? 누르면 인지세 안내 팝업
+   한 문단으로 흐르고 &quot;인지세 ? 가 발생해요.&quot;만 붙여서 줄바꿈 */
+.ln-stamp { margin-top: 6px; font-size: 11px; line-height: 16px; font-weight: 500; color: var(--ln-text-muted); }
+.ln-stamp__keep { white-space: nowrap; }
+.ln-stamp .ln-tooltip { width: 14px; height: 14px; font-size: 8px; line-height: 14px; vertical-align: -3px; margin: 0 2px; }
+
 /* 하단 버튼 */
 .ln-cta { padding: 8px 24px 32px; }
 .ln-cta__btn { width: 100%; height: 56px; border: 0; border-radius: 12px; background: var(--ln-primary); color: #FFFFFF; font-size: 16px; font-weight: 700; cursor: pointer; }
@@ -1637,10 +1648,6 @@ react/cjs/react-jsx-runtime.production.min.js:
 .ln-picked { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 8px 8px 8px 14px; border: 1px solid #B8CAFF; border-radius: 999px; background: var(--ln-primary-soft); font-size: 12px; line-height: 18px; font-weight: 700; color: #1859E1; cursor: pointer; }
 .ln-picked__change { padding: 4px 8px; border-radius: 999px; background: #FFFFFF; font-size: 10px; line-height: 12px; font-weight: 700; color: var(--ln-text-muted); }
 
-/* 인지세 안내 — 한 문단으로 흐르고 &quot;인지세 ? 가 발생해요.&quot;만 붙여서 줄바꿈 */
-.ln-stamp { margin-top: 6px; font-size: 11px; line-height: 16px; font-weight: 500; color: var(--ln-text-muted); }
-.ln-stamp__keep { white-space: nowrap; }
-.ln-stamp .ln-tooltip { width: 14px; height: 14px; font-size: 8px; line-height: 14px; vertical-align: -3px; margin: 0 2px; }
 &lt;/style&gt;
 
 &lt;div class=&quot;page&quot;&gt;
@@ -1652,6 +1659,7 @@ react/cjs/react-jsx-runtime.production.min.js:
       &lt;span class=&quot;chip&quot;&gt;Figma 페이지 &lt;code&gt;05-4_신청정보입력(전체상품)&lt;/code&gt; · &lt;code&gt;…_새컴포넌트&lt;/code&gt; 5개 화면&lt;/span&gt;
       &lt;span class=&quot;chip&quot;&gt;기준 폭 375 (좌우 여백 24)&lt;/span&gt;
       &lt;span class=&quot;chip&quot;&gt;동작 확인 &lt;a href=&quot;https://claude.ai/artifact/2RP2GCqVaoCAByJs1JPqs2&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;신청정보입력 프로토타입&lt;/a&gt;&lt;/span&gt;
+      &lt;span class=&quot;chip&quot;&gt;업무요건 &lt;a href=&quot;https://seolan4990-code.github.io/-/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;신청화면 TO-BE 개발 전달 문서&lt;/a&gt;&lt;/span&gt;
       &lt;span class=&quot;chip&quot;&gt;React 참고 &lt;code&gt;01~05_*.tsx&lt;/code&gt;&lt;/span&gt;
     &lt;/div&gt;
   &lt;/header&gt;
@@ -1705,6 +1713,7 @@ react/cjs/react-jsx-runtime.production.min.js:
             &lt;tr&gt;&lt;td class=&quot;part-name&quot;&gt;상환스케줄 버튼&lt;small&gt;Button/ScheduleTag&lt;/small&gt;&lt;/td&gt;&lt;td&gt;높이 &lt;code&gt;40&lt;/code&gt; · 좌우 &lt;code&gt;14&lt;/code&gt; · 모서리 &lt;code&gt;10&lt;/code&gt; · 선택칸과 간격 &lt;code&gt;8&lt;/code&gt;&lt;/td&gt;&lt;td&gt;Bold &lt;code&gt;11&lt;/code&gt;&lt;/td&gt;&lt;td&gt;비활성 &lt;code&gt;#C9CEDA&lt;/code&gt; · 활성 &lt;code&gt;#2B5CE6&lt;/code&gt;&lt;/td&gt;&lt;td&gt;사잇돌은 이 버튼 대신 상품별 목록&lt;/td&gt;&lt;/tr&gt;
             &lt;tr&gt;&lt;td class=&quot;part-name&quot;&gt;예상 납입 요약&lt;small&gt;Box/SummaryInfo&lt;/small&gt;&lt;/td&gt;&lt;td&gt;패딩 &lt;code&gt;16&lt;/code&gt; · 간격 &lt;code&gt;12&lt;/code&gt; · 모서리 &lt;code&gt;12&lt;/code&gt;&lt;/td&gt;&lt;td&gt;Medium &lt;code&gt;13&lt;/code&gt; · 월 납입액 Bold &lt;code&gt;14&lt;/code&gt;&lt;/td&gt;&lt;td&gt;배경 &lt;code&gt;#EEF3FF&lt;/code&gt; · 항목명 &lt;code&gt;#5B6377&lt;/code&gt; · 값 &lt;code&gt;#161B2E&lt;/code&gt; · 월 납입액 &lt;code&gt;#2B5CE6&lt;/code&gt; · 구분선 &lt;code&gt;#EAEDF3&lt;/code&gt;&lt;/td&gt;&lt;td&gt;계산 전 값은 &quot;—&quot; &lt;code&gt;#9298A8&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;
             &lt;tr&gt;&lt;td class=&quot;part-name&quot;&gt;예/아니오&lt;small&gt;Toggle/TwoOption&lt;/small&gt;&lt;/td&gt;&lt;td&gt;높이 &lt;code&gt;41&lt;/code&gt; · 두 칸 균등 · 사이 &lt;code&gt;8&lt;/code&gt; · 모서리 &lt;code&gt;10&lt;/code&gt; · 라벨 아래 &lt;code&gt;6&lt;/code&gt;&lt;/td&gt;&lt;td&gt;기본 Medium &lt;code&gt;14&lt;/code&gt; · 선택 Bold &lt;code&gt;14&lt;/code&gt;&lt;/td&gt;&lt;td&gt;기본 흰색 / &lt;code&gt;#EAEDF3&lt;/code&gt; / &lt;code&gt;#5B6377&lt;/code&gt; · 선택 &lt;code&gt;#EEF3FF&lt;/code&gt; / &lt;code&gt;#2B5CE6&lt;/code&gt;&lt;/td&gt;&lt;td&gt;보증료정보에서 사용&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td class=&quot;part-name&quot;&gt;인지세 안내&lt;small&gt;조건부 · 공통&lt;/small&gt;&lt;/td&gt;&lt;td&gt;신청금액 필드 맨 아래 · 위 &lt;code&gt;6&lt;/code&gt; · ? 아이콘 &lt;code&gt;14&lt;/code&gt;&lt;/td&gt;&lt;td&gt;Medium &lt;code&gt;11 / 16&lt;/code&gt; · ? Bold &lt;code&gt;8&lt;/code&gt;&lt;/td&gt;&lt;td&gt;&lt;code&gt;#9298A8&lt;/code&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;상품 한도 5,000만원 이상일 때만&lt;/b&gt; 노출 · ? 누르면 인지세 안내 팝업&lt;/td&gt;&lt;/tr&gt;
             &lt;tr&gt;&lt;td class=&quot;part-name&quot;&gt;확인 버튼&lt;small&gt;Button/Primary&lt;/small&gt;&lt;/td&gt;&lt;td&gt;높이 &lt;code&gt;56&lt;/code&gt; · 모서리 &lt;code&gt;12&lt;/code&gt; · 영역 패딩 &lt;code&gt;8 24 32&lt;/code&gt;&lt;/td&gt;&lt;td&gt;Bold &lt;code&gt;16&lt;/code&gt;&lt;/td&gt;&lt;td&gt;&lt;code&gt;#2B5CE6&lt;/code&gt; / 흰색&lt;/td&gt;&lt;td&gt;스크롤 끝 인라인 버튼&lt;/td&gt;&lt;/tr&gt;
           &lt;/tbody&gt;
         &lt;/table&gt;
@@ -1765,6 +1774,7 @@ react/cjs/react-jsx-runtime.production.min.js:
         &lt;li&gt;&lt;span&gt;&lt;b&gt;최대금액 토글.&lt;/b&gt; 체크하면 신청금액이 한도로 채워지고 오른쪽에 원 단위 금액이 보여요. 체크를 풀면 금액을 비워요. 금액을 한도와 같게 직접 입력해도 체크돼요.&lt;/span&gt;&lt;/li&gt;
         &lt;li&gt;&lt;span&gt;&lt;b&gt;납입일 잠금.&lt;/b&gt; 신청정보가 다 채워지기 전에는 잠금 배너를 보여주고 납입일 선택칸은 &lt;span class=&quot;inline&quot;&gt;disabled&lt;/span&gt;예요. 잠긴 칸을 누르면 &quot;대출기간을 먼저 선택해주세요.&quot; 같은 토스트를 띄워요.&lt;/span&gt;&lt;/li&gt;
         &lt;li&gt;&lt;span&gt;&lt;b&gt;상환스케줄.&lt;/b&gt; 금액·기간·납입일이 모두 정해지면 버튼이 파란색으로 활성되고, 누르면 예상 상환스케줄 바텀시트가 떠요.&lt;/span&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;span&gt;&lt;b&gt;인지세 안내 (공통).&lt;/b&gt; 상품 한도가 5,000만원 이상이면 신청금액 필드 아래에 &quot;· 신청금액이 5,000만원 초과 시 인지세 ? 가 발생해요.&quot;를 보여줘요. ?를 누르면 인지세 안내 팝업(「인지세법」 · 금융회사와 고객 50%씩 부담)이 열려요. 한도가 5,000만원 미만인 상품은 노출하지 않아요. 지금 5개 상품 중에는 참신한대출(대환·한도 6,000만원)만 해당돼요.&lt;/span&gt;&lt;/li&gt;
         &lt;li&gt;&lt;span&gt;&lt;b&gt;확인 버튼.&lt;/b&gt; 빈 항목이 있으면 해당 항목에 에러를 표시하고 첫 번째 빈 항목으로 스크롤해요.&lt;/span&gt;&lt;/li&gt;
         &lt;li&gt;&lt;span&gt;&lt;b&gt;바텀시트.&lt;/b&gt; 선택칸·? 아이콘은 모두 바텀시트로 열려요. 제목 Bold 19, 목록 행 좌우 20 · 상하 15, 선택된 행은 &lt;span class=&quot;inline&quot;&gt;#EEF3FF&lt;/span&gt; 배경에 파란 체크예요. 상환방법 목록에서 만기일시상환은 노출하지 않아요.&lt;/span&gt;&lt;/li&gt;
         &lt;li&gt;&lt;span&gt;&lt;b&gt;줄바꿈.&lt;/b&gt; 화면 전체에 &lt;span class=&quot;inline&quot;&gt;word-break: keep-all&lt;/span&gt;을 넣어 단어 중간에서 끊기지 않게 해요.&lt;/span&gt;&lt;/li&gt;
@@ -2054,16 +2064,24 @@ react/cjs/react-jsx-runtime.production.min.js:
   P.push({
     id: &#x27;refi&#x27;, name: &#x27;참신한대출(대환)&#x27;, figma: &#x27;1516:6045&#x27;, file: &#x27;05_ApplyChamsinhanRefinance.tsx&#x27;, proto: &#x27;#s05&#x27;, css: &#x27;css-refi&#x27;,
     diff: [
-      [&#x27;신청금액&#x27;, &#x27;입력칸 옆에 [상환할 대출 선택] 버튼(높이 40). 대출을 고르면 금액이 자동으로 채워지고, 아래에 &quot;삼성카드 외 4건 선택됨 · 변경&quot; 칩이 보여요.&#x27;],
-      [&#x27;인지세 안내&#x27;, &#x27;칩 아래 11 Medium 한 문단. &quot;인지세 ? 가 발생해요.&quot; 부분만 붙여서(nowrap) 줄바꿈해요. ?를 누르면 인지세 안내 시트.&#x27;],
+      [&#x27;신청금액&#x27;, &#x27;입력칸 옆에 [상환할 대출 선택] 버튼(높이 40). 금액은 직접 입력하지 않고, 고른 대출 합계로 자동으로 채워져요(아래 동작 참고).&#x27;],
+      [&#x27;인지세 안내&#x27;, &#x27;공통 규칙이에요(A6 참고). 한도 6,000만원이라 칩 아래에 노출돼요.&#x27;],
       [&#x27;고정값&#x27;, &#x27;대출자금 용도 = 타행대환 (화살표 없음).&#x27;],
       [&#x27;시트&#x27;, &#x27;상환할 대출 선택 시트(목록 체크) · 추가한도 입력(밑줄형 입력칸) · 상환방법 목록에서 만기일시 제외.&#x27;]
     ],
     flags: [],
+    flow: [
+      [&#x27;선택 전&#x27;, &#x27;신청금액 칸은 비어 있고 칩은 없어요. 이 상태로 [확인]을 누르면 신청금액 아래에 &quot;상환할 대출을 선택해주세요.&quot; 에러를 보여줘요.&#x27;],
+      [&#x27;대출 선택&#x27;, &#x27;[상환할 대출 선택]을 누르면 바텀시트가 열려요. 고객의 대출이 카드로 나오고 여러 건을 고를 수 있어요. 상환이 안 되는 대출은 흐리게 &quot;상환불가&quot;로 보여주고 고를 수 없어요. 시트 아래에 &quot;총 n건 · 합계 ○○만원&quot;이 바로 계산돼요.&#x27;],
+      [&#x27;확인&#x27;, &#x27;시트의 [확인]을 누르면, 한도가 남는 경우 추가한도 입력 시트로 이어져요(최대 = 한도 − 선택 합계). 한도가 남지 않으면 시트가 바로 닫혀요.&#x27;],
+      [&#x27;금액 반영&#x27;, &#x27;신청금액 = 고른 대출 합계 + 추가한도. 입력칸에 자동으로 들어가고 고객이 직접 고칠 수 없어요.&#x27;],
+      [&#x27;요약 칩&#x27;, &#x27;1건 이상 고르면 신청금액 아래에 칩이 나와요. 1건이면 &lt;b&gt;&quot;{대출명} 선택됨&quot;&lt;/b&gt;, 2건 이상이면 &lt;b&gt;&quot;{첫 번째 대출명} 외 {나머지 건수}건 선택됨&quot;&lt;/b&gt;이에요. 예) 5건 → &quot;삼성카드 외 4건 선택됨&quot;. 첫 번째 대출은 시트 목록에서 가장 위에 있는 선택 항목이에요.&#x27;],
+      [&#x27;칩 누르기&#x27;, &#x27;칩 전체가 버튼이에요. 누르면 상환할 대출 선택 시트가 다시 열리고, 이전에 고른 대출이 체크된 상태로 보여요. 오른쪽 &quot;변경&quot;은 누를 수 있다는 표시용 라벨이에요.&#x27;],
+      [&#x27;인지세&#x27;, &#x27;칩 아래에 인지세 안내가 보여요. 공통 규칙(상품 한도 5,000만원 이상일 때 노출 · ? 누르면 팝업)을 따르고, 대환은 한도가 6,000만원이라 항상 보여요.&#x27;]
+    ],
     components: [
       [&#x27;상환할 대출 선택 버튼&lt;small&gt;Button/SelectRepayLoan&lt;/small&gt;&#x27;, &#x27;높이 &lt;code&gt;40&lt;/code&gt; · 좌우 &lt;code&gt;16&lt;/code&gt; · 모서리 &lt;code&gt;10&lt;/code&gt; · 입력칸과 간격 &lt;code&gt;8&lt;/code&gt;&#x27;, &#x27;Bold &lt;code&gt;13&lt;/code&gt;&#x27;, &#x27;&lt;code&gt;#2B5CE6&lt;/code&gt; / 흰색&#x27;],
-      [&#x27;선택 요약 칩&lt;small&gt;Chip/SelectedSummary&lt;/small&gt;&#x27;, &#x27;패딩 &lt;code&gt;8 8 8 14&lt;/code&gt; · 간격 &lt;code&gt;8&lt;/code&gt; · 모서리 &lt;code&gt;999&lt;/code&gt; · 필드 아래 &lt;code&gt;6&lt;/code&gt;&#x27;, &#x27;Bold &lt;code&gt;12 / 18&lt;/code&gt; · &quot;변경&quot; Bold &lt;code&gt;10&lt;/code&gt;&#x27;, &#x27;배경 &lt;code&gt;#EEF3FF&lt;/code&gt; · 테두리 &lt;code&gt;#B8CAFF&lt;/code&gt; · 글자 &lt;code&gt;#1859E1&lt;/code&gt; · 변경 흰 배경 / &lt;code&gt;#9298A8&lt;/code&gt;&#x27;],
-      [&#x27;인지세 안내&#x27;, &#x27;칩 아래 &lt;code&gt;6&lt;/code&gt; · ? 아이콘 &lt;code&gt;14&lt;/code&gt;&#x27;, &#x27;Medium &lt;code&gt;11 / 16&lt;/code&gt; · ? Bold &lt;code&gt;8&lt;/code&gt;&#x27;, &#x27;&lt;code&gt;#9298A8&lt;/code&gt;&#x27;]
+      [&#x27;선택 요약 칩&lt;small&gt;Chip/SelectedSummary&lt;/small&gt;&#x27;, &#x27;패딩 &lt;code&gt;8 8 8 14&lt;/code&gt; · 간격 &lt;code&gt;8&lt;/code&gt; · 모서리 &lt;code&gt;999&lt;/code&gt; · 필드 아래 &lt;code&gt;6&lt;/code&gt;&#x27;, &#x27;Bold &lt;code&gt;12 / 18&lt;/code&gt; · &quot;변경&quot; Bold &lt;code&gt;10&lt;/code&gt;&#x27;, &#x27;배경 &lt;code&gt;#EEF3FF&lt;/code&gt; · 테두리 &lt;code&gt;#B8CAFF&lt;/code&gt; · 글자 &lt;code&gt;#1859E1&lt;/code&gt; · 변경 흰 배경 / &lt;code&gt;#9298A8&lt;/code&gt;&#x27;]
     ],
     build: function () {
       var amt = amount({ label: &#x27;신청금액&#x27;, placeholder: &#x27;금액 입력&#x27;, value: &#x27;2,000&#x27; });
@@ -2144,7 +2162,9 @@ react/cjs/react-jsx-runtime.production.min.js:
       &#x27;&lt;h3 class=&quot;bh&quot;&gt;&lt;span class=&quot;n&quot;&gt;B&#x27; + (i + 1) + &#x27;&lt;/span&gt;&#x27; + p.name + &#x27;&lt;/h3&gt;&#x27; +
       &#x27;&lt;div class=&quot;meta&quot;&gt;&lt;span class=&quot;chip&quot;&gt;Figma &lt;code&gt;&#x27; + p.figma + &#x27;&lt;/code&gt;&lt;/span&gt;&lt;span class=&quot;chip&quot;&gt;React &lt;code&gt;&#x27; + p.file + &#x27;&lt;/code&gt;&lt;/span&gt;&lt;span class=&quot;chip&quot;&gt;동작 &lt;a href=&quot;https://claude.ai/artifact/2RP2GCqVaoCAByJs1JPqs2&#x27; + p.proto + &#x27;&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;프로토타입에서 보기&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&#x27; +
       &#x27;&lt;div class=&quot;product&quot;&gt;&lt;div class=&quot;phone&quot;&gt;&lt;div class=&quot;phone-scroll&quot;&gt;&#x27; + html + &#x27;&lt;/div&gt;&lt;/div&gt;&#x27; +
-      &#x27;&lt;div class=&quot;side&quot;&gt;&lt;h4&gt;공통과 다른 점&lt;/h4&gt;&lt;ul class=&quot;diff&quot;&gt;&#x27; + p.diff.map(function (d) { return &#x27;&lt;li&gt;&lt;span class=&quot;k&quot;&gt;&#x27; + d[0] + &#x27;&lt;/span&gt;&lt;span&gt;&#x27; + d[1] + &#x27;&lt;/span&gt;&lt;/li&gt;&#x27;; }).join(&#x27;&#x27;) + &#x27;&lt;/ul&gt;&#x27; + comp + flags + &#x27;&lt;/div&gt;&lt;/div&gt;&#x27; +
+      &#x27;&lt;div class=&quot;side&quot;&gt;&lt;h4&gt;공통과 다른 점&lt;/h4&gt;&lt;ul class=&quot;diff&quot;&gt;&#x27; + p.diff.map(function (d) { return &#x27;&lt;li&gt;&lt;span class=&quot;k&quot;&gt;&#x27; + d[0] + &#x27;&lt;/span&gt;&lt;span&gt;&#x27; + d[1] + &#x27;&lt;/span&gt;&lt;/li&gt;&#x27;; }).join(&#x27;&#x27;) + &#x27;&lt;/ul&gt;&#x27; +
+      (p.flow ? &#x27;&lt;h4&gt;상환할 대출 선택 · 요약 칩 동작&lt;/h4&gt;&lt;ol class=&quot;flow&quot;&gt;&#x27; + p.flow.map(function (d) { return &#x27;&lt;li&gt;&lt;span class=&quot;k&quot;&gt;&#x27; + d[0] + &#x27;&lt;/span&gt;&lt;span&gt;&#x27; + d[1] + &#x27;&lt;/span&gt;&lt;/li&gt;&#x27;; }).join(&#x27;&#x27;) + &#x27;&lt;/ol&gt;&#x27; : &#x27;&#x27;) +
+      comp + flags + &#x27;&lt;/div&gt;&lt;/div&gt;&#x27; +
       &#x27;&lt;div class=&quot;tabs&quot; role=&quot;tablist&quot; aria-label=&quot;&#x27; + p.name + &#x27; 코드&quot;&gt;&#x27; +
         &#x27;&lt;button class=&quot;tab&quot; role=&quot;tab&quot; aria-selected=&quot;true&quot; data-group=&quot;&#x27; + p.id + &#x27;&quot; data-panel=&quot;&#x27; + p.id + &#x27;-html&quot;&gt;화면 HTML&lt;/button&gt;&#x27; +
         &#x27;&lt;button class=&quot;tab&quot; role=&quot;tab&quot; aria-selected=&quot;false&quot; data-group=&quot;&#x27; + p.id + &#x27;&quot; data-panel=&quot;&#x27; + p.id + &#x27;-css&quot;&gt;전용 CSS&lt;/button&gt;&lt;/div&gt;&#x27; +
@@ -2260,7 +2280,7 @@ react/cjs/react-jsx-runtime.production.min.js:
 <tr><td><b>4-2 햇살론</b></td><td>상환방법 = 원리금균등상환 · 대출자금 용도 = 생활 <b>고정값</b>(화살표 없음). <b>보증료정보</b> 섹션 추가: 안내문 "받을 수 있는 <b>보증료 우대</b>를 확인해 주세요." / 사회적배려대상자(?) / 국민취업지원제도 취업성공자(예·아니오, ?) / 보증료 납부방식(?) / 예상 보증료.</td></tr>
 <tr><td><b>4-3 햇살론특례</b></td><td>신청정보에 <b>거치기간</b>(없음/1년) 선택칸 + <code>?</code> 추가. 순서는 신청금액 → <b>거치기간 → 대출기간</b>. 거치기간을 먼저 골라야 대출기간을 고를 수 있고(아니면 "거치기간을 먼저 선택해주세요." 토스트), 거치 1년이면 대출기간이 48·72개월로 바뀌고 "(거치 12개월 포함)"이 붙어요. 상환방법·용도 고정값. 보증료정보는 <b>사회적배려대상자 / 국민취업지원제도 취업성공자만</b>(납부방식·예상 보증료 없음) — 우대가 적용되면 필드 아래 초록 배지로 인하율 표시.</td></tr>
 <tr><td id="s4-saitdolplus"><b>4-4 사잇돌2 + 참신한더드림론</b></td><td>상품 카드 <b>2장</b>(간격 12, 한 단계 작은 카드). 라벨 "<b>총 신청금액</b>" — 금액 입력 후 아래에 <b>상품별 자동 배분 줄</b>, 최소금액 미만인 상품 줄은 빨간색 + 안내 문구. 납부정보는 잠금 배너·상환스케줄 버튼 없이 <b>요약 박스 + 안내 문구 + 상품별 상환스케줄 목록</b>. 월 납입액 앞에 "총".</td></tr>
-<tr><td id="s4-daehwan"><b>4-5 참신한대출(대환)</b></td><td>신청금액 입력칸 옆 <b>[상환할 대출 선택]</b> 버튼(높이 40). 대출을 고르면 금액 자동 입력 + "삼성카드 외 4건 선택됨 · 변경" <b>선택 요약 칩</b>. 칩 아래 <b>인지세 안내</b> 한 문단. 대출자금 용도 = 타행대환 고정값. 납입일 옆 상환스케줄 버튼 없음.</td></tr>
+<tr><td id="s4-daehwan"><b>4-5 참신한대출(대환)</b></td><td>신청금액 입력칸 옆 <b>[상환할 대출 선택]</b> 버튼(높이 40). 금액은 직접 입력하지 않고 고른 대출 합계(+추가한도)로 자동 입력 + "삼성카드 외 4건 선택됨 · 변경" <b>선택 요약 칩</b>(동작은 <a href="#s4-refi-flow">⑤-1</a>). 칩 아래 <b>인지세 안내</b>(공통 규칙 · 한도 6,000만원이라 항상 노출). 대출자금 용도 = 타행대환 고정값. 납입일 옆 상환스케줄 버튼 없음.</td></tr>
 </tbody>
 </table>
 <h4>④ 사잇돌2+참신한더드림론 — 문구 · 동작  <span class="flag p">변경</span></h4>
@@ -2274,6 +2294,19 @@ react/cjs/react-jsx-runtime.production.min.js:
 <tr><td><b>[확인] 최종 확인 팝업</b> <span class="flag s">기존 로직</span></td><td>사잇돌2대출 X,XXX만원과 참신한더드림론 XXX만원으로 최종 약정 시 총 2개의 계좌로 실행됩니다. 이어서 진행하시겠습니까? [아니오] / [예]<br/>참신한더드림론 0원인 경우 — 사잇돌2대출만 신청하셨습니다. 이어서 진행하시겠습니까? [아니오] / [예]</td></tr>
 </tbody>
 </table>
+<h4 id="s4-refi-flow">⑤-1 참신한대출(대환) — 상환할 대출 선택 · 요약 칩 동작  <span class="flag p">09.28 신규</span></h4>
+<table>
+<thead><tr><th style="width:36px">#</th><th style="width:110px">단계</th><th>동작</th></tr></thead>
+<tbody>
+<tr><td class="mono">1</td><td><b>선택 전</b></td><td>신청금액 칸은 비어 있고 칩은 없어요. 이 상태로 [확인]을 누르면 신청금액 아래에 <b>"상환할 대출을 선택해주세요."</b> 에러.</td></tr>
+<tr><td class="mono">2</td><td><b>대출 선택</b></td><td>[상환할 대출 선택]을 누르면 바텀시트. 고객 대출이 카드로 나오고 여러 건 선택 가능. 상환이 안 되는 대출은 흐리게 "상환불가"로 보여주고 선택 불가. 시트 아래 "총 n건 · 합계 ○○만원" 실시간 계산.</td></tr>
+<tr><td class="mono">3</td><td><b>확인</b></td><td>시트 [확인] → 한도가 남으면 <b>추가한도 입력 시트</b>로 이어짐(최대 = 한도 − 선택 합계). 남지 않으면 시트가 바로 닫힘.</td></tr>
+<tr><td class="mono">4</td><td><b>금액 반영</b></td><td>신청금액 = 고른 대출 합계 + 추가한도. 입력칸에 자동으로 들어가고 <b>고객이 직접 고칠 수 없어요</b>.</td></tr>
+<tr><td class="mono">5</td><td><b>요약 칩</b></td><td>1건 이상 고르면 신청금액 아래에 칩. 1건이면 <b>"{대출명} 선택됨"</b>, 2건 이상이면 <b>"{첫 번째 대출명} 외 {나머지 건수}건 선택됨"</b>. 예) 5건 → "삼성카드 외 4건 선택됨". 첫 번째 대출 = 시트 목록에서 가장 위에 있는 선택 항목.</td></tr>
+<tr><td class="mono">6</td><td><b>칩 누르기</b></td><td>칩 전체가 버튼. 누르면 상환할 대출 선택 시트가 다시 열리고 이전에 고른 대출이 체크된 상태. 오른쪽 "변경"은 누를 수 있다는 표시용 라벨.</td></tr>
+<tr><td class="mono">7</td><td><b>인지세</b></td><td>칩 아래 인지세 안내. 공통 규칙(상품 한도 5,000만원 이상일 때 노출)을 따르고, 대환은 한도 6,000만원이라 항상 보여요.</td></tr>
+</tbody>
+</table>
 <h4 id="s4-sheet-unify">⑤ 바텀시트 — 공통 스타일  <span class="flag p">변경</span></h4>
 <ul class="tick">
 <li>선택칸과 <code>?</code> 아이콘은 모두 바텀시트로 열려요. 시트 제목 <b>Bold 19</b>.</li>
@@ -2284,7 +2317,7 @@ react/cjs/react-jsx-runtime.production.min.js:
 <h4 id="s4-tooltip">⑥ 안내 툴팁(<code>?</code>) 위치</h4>
 <ul class="tick">
 <li>상환방법(전 상품) · 거치기간(햇살론특례) · 사회적배려대상자 · 국민취업지원제도 취업성공자 · 보증료 납부방식(햇살론) 라벨 뒤 4 간격.</li>
-<li>참신한대출(대환) 인지세 안내 문장 안 "인지세 <code>?</code> 가 발생해요." — 14×14 작은 <code>?</code>(Bold 8).</li>
+<li>인지세 안내 문장 안 "인지세 <code>?</code> 가 발생해요." — 14×14 작은 <code>?</code>(Bold 8). <b>상품 한도 5,000만원 이상인 상품 공통</b>(현재는 참신한대출(대환)만 해당).</li>
 <li>햇살론 보증료 안내 <code>?</code>는 예상 보증료 박스가 아니라 <b>"보증료 납부방식" 라벨 옆</b>. 시트 안내문 "…고객님이 부담하시는 <b>보증료가 발생해요</b>."(뒷부분 Bold).</li>
 <li>햇살론특례 거치기간 안내 시트: 막대 그래프 + 마지막 문장 빨간 Bold. 상환방법 안내 시트 제목 "햇살론특례는 원리금균등으로만 갚을 수 있어요".</li>
 </ul>
@@ -2309,6 +2342,7 @@ react/cjs/react-jsx-runtime.production.min.js:
 <tr><td><b>상환스케줄 버튼</b><br/><small style="color:var(--ink-4)">Button/ScheduleTag</small></td><td>높이 <code>40</code> · 좌우 <code>14</code> · 모서리 <code>10</code> · 선택칸과 간격 <code>8</code></td><td>Bold <code>11</code></td><td>비활성 <code>#C9CEDA</code> · 활성 <code>#2B5CE6</code>. 사잇돌은 상품별 목록, 대환은 버튼 없음.</td></tr>
 <tr><td><b>예상 납입 요약</b><br/><small style="color:var(--ink-4)">Box/SummaryInfo</small></td><td>패딩 <code>16</code> · 간격 <code>12</code> · 모서리 <code>12</code></td><td>Medium <code>13</code> · 월 납입액 Bold <code>14</code></td><td>배경 <code>#EEF3FF</code> · 항목명 <code>#5B6377</code> · 값 <code>#161B2E</code> · 월 납입액 <code>#2B5CE6</code> · 구분선 <code>#EAEDF3</code> · 계산 전 "—" <code>#9298A8</code>. 계산 중 opacity 0.4, 실패 시 "다시 시도".</td></tr>
 <tr><td><b>예/아니오</b><br/><small style="color:var(--ink-4)">Toggle/TwoOption</small></td><td>높이 <code>41</code> · 두 칸 균등 · 사이 <code>8</code> · 모서리 <code>10</code> · 라벨 아래 <code>6</code></td><td>기본 Medium <code>14</code> · 선택 Bold <code>14</code></td><td>기본 흰색 / 테두리 <code>#EAEDF3</code> / <code>#5B6377</code> · 선택 <code>#EEF3FF</code> / <code>#2B5CE6</code>. 보증료정보에서 사용.</td></tr>
+<tr><td><b>인지세 안내</b><br/><small style="color:var(--ink-4)">조건부 · 공통</small></td><td>신청금액 필드 맨 아래 · 위 <code>6</code> · ? 아이콘 <code>14</code></td><td>Medium <code>11/16</code> · ? Bold <code>8</code></td><td><code>#9298A8</code> · <b>상품 한도 5,000만원 이상일 때만</b> 노출 · "인지세 ? 가 발생해요."만 붙여서(nowrap) 줄바꿈 · ? 누르면 인지세 안내 팝업. <span class="flag p">09.28 공통화</span></td></tr>
 <tr><td><b>확인 버튼</b><br/><small style="color:var(--ink-4)">Button/Primary</small></td><td>높이 <code>56</code> · 모서리 <code>12</code> · 영역 패딩 <code>8 24 32</code></td><td>Bold <code>16</code></td><td><code>#2B5CE6</code> / 흰색 · 스크롤 끝 인라인. 비활성화하지 않음(누르면 에러 표시). (이전 radius 13 폐기)</td></tr>
 </tbody>
 </table>
@@ -2325,7 +2359,6 @@ react/cjs/react-jsx-runtime.production.min.js:
 <tr><td><b>상품별 상환스케줄 목록 · 사잇돌</b></td><td>위쪽 <code>16</code> · 제목 아래 <code>8</code> · 행 상하 <code>13</code> · 행 위 선 1</td><td>제목 Medium <code>13</code> · 행 Light <code>13</code> · › <code>15</code></td><td>제목 <code>#5B6377</code> · 행 <code>#161B2E</code> · 선 <code>#E8EBF2</code>.</td></tr>
 <tr><td><b>상환할 대출 선택 버튼</b><br/><small style="color:var(--ink-4)">Button/SelectRepayLoan · 대환</small></td><td>높이 <code>40</code> · 좌우 <code>16</code> · 모서리 <code>10</code> · 입력칸과 간격 <code>8</code></td><td>Bold <code>13</code></td><td><code>#2B5CE6</code> / 흰색.</td></tr>
 <tr><td><b>선택 요약 칩</b><br/><small style="color:var(--ink-4)">Chip/SelectedSummary · 대환</small></td><td>패딩 <code>8 8 8 14</code> · 간격 <code>8</code> · 모서리 <code>999</code> · 필드 아래 <code>6</code></td><td>Bold <code>12/18</code> · "변경" Bold <code>10</code></td><td>배경 <code>#EEF3FF</code> · 테두리 <code>#B8CAFF</code> · 글자 <code>#1859E1</code> · 변경 흰 배경 / <code>#9298A8</code>.</td></tr>
-<tr><td><b>인지세 안내 · 대환</b></td><td>칩 아래 <code>6</code> · ? 아이콘 <code>14</code></td><td>Medium <code>11/16</code> · ? Bold <code>8</code></td><td><code>#9298A8</code> · "인지세 ? 가 발생해요."만 붙여서(nowrap) 줄바꿈.</td></tr>
 </tbody>
 </table>
 <h4>동작 컴포넌트 (가이드 외 · 기존 유지)</h4>
@@ -2336,7 +2369,7 @@ react/cjs/react-jsx-runtime.production.min.js:
 <tr><td><b>SheetOverlay</b></td><td>≥640px: 중앙 모달(폭 min(540px,92vw), radius 20). &lt;640px: 하단 바텀시트(radius 20 20 0 0, 핸들바 36×4).</td></tr>
 <tr><td><b>납입일 시트 안내 배너</b></td><td>납입일 시트 상단 상시 배너(bg #F5F6F9 · radius 10) "신청일 기준 4영업일 이내 날짜는 선택할 수 없어요". 해당 날짜 회색 비활성, 누르면 "납입일은 4영업일 이후부터 선택가능해요." 토스트.</td></tr>
 <tr><td><b>상환할 대출 선택 시트</b> <span class="flag s">대환 전용</span></td><td>대출사명·금리·금액·원금/이자, 중도상환수수료 없음 시 초록 배지. 상환불가 대출은 회색 + 선택 비활성. 다건 체크, 하단 합계 실시간 표시.</td></tr>
-<tr><td><b>추가한도 입력</b> <span class="flag s">대환 전용</span></td><td>상환할 대출 선택 후 잔여 한도가 있으면 노출. 추가금액(A, <b>밑줄형 입력칸</b>) + 상환대출 합계(B) = 총 신청금액(A+B).</td></tr>
+<tr><td><b>추가한도 입력 시트</b> <span class="flag s">대환 전용</span></td><td>상환할 대출 선택 시트 [확인] 후 잔여 한도가 있으면 이어서 열림. 추가금액(A, <b>밑줄형 입력칸</b>, 최대 = 한도 − 선택 합계) + 상환대출 합계(B) = 총 신청금액(A+B).</td></tr>
 <tr><td><b>토스트</b></td><td>화면 하단 2.4초 노출 후 사라짐 · bg rgba(22,27,46,.94) · 14 Medium.</td></tr>
 </tbody>
 </table>
@@ -2367,7 +2400,8 @@ react/cjs/react-jsx-runtime.production.min.js:
 <dt>⑨ 확인 버튼</dt><dd>버튼은 비활성화하지 않아요. 빈 항목이 있으면 해당 항목에 에러를 표시하고 <b>첫 번째 빈 항목으로 스크롤</b>. 보증료 대상 상품은 사회적배려대상자·취업성공자·납부방식까지 채워야 완료.</dd>
 <dt>⑩ 상환방법 목록</dt><dd>전 상품에서 <b>만기일시상환 미노출</b>. 햇살론·햇살론특례는 원리금균등상환 고정.</dd>
 <dt>⑪ 사잇돌 금액 배분</dt><dd>총 신청금액을 상품 한도 순서로 자동 배분해 상품별 줄에 표시. 상품별 최소금액 미만이면 해당 줄 에러 + "○○은 최소 N만원 이상부터 신청할 수 있어요."</dd>
-<dt>⑫ 대환 신청금액 산정</dt><dd>[상환할 대출 선택] 합계로 자동 입력 → 선택 요약 칩("○○ 외 N건 선택됨 · 변경"). 잔여 한도가 있으면 추가한도(A) 입력으로 A+B 확정. 용도 "타행대환" 고정. 신청금액 5,000만원 초과 시 인지세 안내 노출.</dd>
+<dt>⑫ 대환 신청금액 산정</dt><dd>신청금액 = 고른 대출 합계 + 추가한도(최대 = 한도 − 선택 합계). 자동 입력이며 직접 수정 불가. 선택 전 [확인] 시 "상환할 대출을 선택해주세요." 에러. 요약 칩은 1건 "{대출명} 선택됨" / 2건 이상 "{첫 번째 대출명} 외 {n}건 선택됨", 칩을 누르면 선택 시트 재오픈(이전 선택 유지). 용도 "타행대환" 고정. 단계별 동작은 <a href="#s4-refi-flow">⑤-1</a>.</dd>
+<dt>⑫-1 인지세 안내 (공통)  <span class="flag p">09.28 변경</span></dt><dd><b>상품 한도가 5,000만원 이상</b>이면 신청금액 필드 아래에 "· 신청금액이 5,000만원 초과 시 인지세 <code>?</code> 가 발생해요."를 노출. <code>?</code>를 누르면 인지세 안내 팝업(「인지세법」 · 금융회사와 고객 50%씩 부담). 한도 5,000만원 미만 상품은 노출하지 않음. 현재 5개 상품 중 참신한대출(대환 · 한도 6,000만원)만 해당. (이전: 대환 전용 · 신청금액 5,000만원 초과 시 노출)</dd>
 <dt>⑬ 반응형 · 줄바꿈</dt><dd>PC·태블릿은 수치 그대로 내용 폭만 최대 620/760 가운데 정렬, 시트는 중앙 모달. 화면 전체 <code>word-break: keep-all</code>.</dd>
 </div>
 </section>
@@ -2468,6 +2502,12 @@ react/cjs/react-jsx-runtime.production.min.js:
 .ln-two__opt { flex: 1; height: 41px; border: 1px solid var(--ln-line); border-radius: 10px; background: #FFFFFF; font-size: 14px; font-weight: 500; color: var(--ln-text-sub); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
 .ln-two__opt[aria-checked="true"] { background: var(--ln-primary-soft); border-color: var(--ln-primary); font-weight: 700; color: var(--ln-primary); }
 
+
+/* (공통) 인지세 안내 — 상품 한도가 5,000만원 이상일 때만 노출 · ? 누르면 인지세 안내 팝업
+   한 문단으로 흐르고 "인지세 ? 가 발생해요."만 붙여서 줄바꿈 */
+.ln-stamp { margin-top: 6px; font-size: 11px; line-height: 16px; font-weight: 500; color: var(--ln-text-muted); }
+.ln-stamp__keep { white-space: nowrap; }
+.ln-stamp .ln-tooltip { width: 14px; height: 14px; font-size: 8px; line-height: 14px; vertical-align: -3px; margin: 0 2px; }
 
 /* 하단 버튼 */
 .ln-cta { padding: 8px 24px 32px; }
@@ -3254,12 +3294,7 @@ react/cjs/react-jsx-runtime.production.min.js:
 
 /* 선택한 대출 요약 칩 (Chip/SelectedSummary) */
 .ln-picked { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 8px 8px 8px 14px; border: 1px solid #B8CAFF; border-radius: 999px; background: var(--ln-primary-soft); font-size: 12px; line-height: 18px; font-weight: 700; color: #1859E1; cursor: pointer; }
-.ln-picked__change { padding: 4px 8px; border-radius: 999px; background: #FFFFFF; font-size: 10px; line-height: 12px; font-weight: 700; color: var(--ln-text-muted); }
-
-/* 인지세 안내 — 한 문단으로 흐르고 "인지세 ? 가 발생해요."만 붙여서 줄바꿈 */
-.ln-stamp { margin-top: 6px; font-size: 11px; line-height: 16px; font-weight: 500; color: var(--ln-text-muted); }
-.ln-stamp__keep { white-space: nowrap; }
-.ln-stamp .ln-tooltip { width: 14px; height: 14px; font-size: 8px; line-height: 14px; vertical-align: -3px; margin: 0 2px; }</pre></div>
+.ln-picked__change { padding: 4px 8px; border-radius: 999px; background: #FFFFFF; font-size: 10px; line-height: 12px; font-weight: 700; color: var(--ln-text-muted); }</pre></div>
 </details>
 </section>
 <!-- 24 화면4 필드별 안내 툴팁 전문 -->
@@ -3276,7 +3311,7 @@ react/cjs/react-jsx-runtime.production.min.js:
 <tr><td class="mono">④</td><td>"거치기간" 옆  <code>?</code>  <span class="flag s">햇살론특례 전용</span>  <span class="flag p">확정</span></td><td>거치기간 종료 후 월 납입금이 늘어날 수 있음을 안내.</td></tr>
 <tr><td class="mono">⑤</td><td>"사회적배려대상자" 옆  <code>?</code></td><td>대상자 확인 시 보증료 0.5%p 인하 + 대상별 증빙서류(한부모가족·조손가족·다문화가족·북한이탈주민·등록장애인·국민기초생활수급자·차상위계층·근로장려금수급자·자활근로자 9종) 안내.</td></tr>
 <tr><td class="mono">⑥</td><td>"국민취업지원제도 취업성공자" 옆  <code>?</code></td><td>제도 설명 + 참여확인서 제출 시 보증료 0.1%p 인하 안내.</td></tr>
-<tr><td class="mono">⑦</td><td>"인지세" 안내 아이콘  <code>?</code>  <span class="flag s">참신한대출(대환) · 신청금액 5,000만원 초과 시</span></td><td>인지세 발생 기준(은행·고객 각 50% 부담, 고객부담분은 대출금에서 차감) 안내.</td></tr>
+<tr><td class="mono">⑦</td><td>"인지세" 안내 아이콘  <code>?</code>  <span class="flag s">공통 · 상품 한도 5,000만원 이상 상품(현재 참신한대출(대환))</span></td><td>인지세 발생 기준(은행·고객 각 50% 부담, 고객부담분은 대출금에서 차감) 안내.</td></tr>
 </tbody>
 </table>
 <div class="note"><b>법적·안내 의미가 있는 문구이므로 게시 전 원문 그대로 검수가 필요합니다.</b> 정확한 카피·팝업 레이아웃·컴포넌트 스타일은 Figma  <code>04_공통_바텀시트·알럿·토스트 레이아웃</code>을 참고해주세요.</div>
@@ -3974,9 +4009,9 @@ export function NoticeBox({ title = "유의사항", bullets }: NoticeBoxProps) {
 <tr><td>국민취업지원제도 우대</td><td>보증료율 0.1%p 인하</td></tr>
 <tr><td>보증료 안내(계산 전)</td><td>신청금액·대출기간과 보증료 납부방식을 선택하면 자동으로 계산돼요.</td></tr>
 <tr><td>확인 버튼</td><td>확인</td></tr>
-<tr><td>상환할 대출 선택(참신한대출(대환))</td><td>상환할 대출 선택 / 상환불가 / 중도상환수수료 없음 / 상환할 대출을 선택해주세요.</td></tr>
+<tr><td>상환할 대출 선택(참신한대출(대환))</td><td>상환할 대출 선택 / 상환불가 / 중도상환수수료 없음 / 총 n건 · 합계 ○○만원 / 상환할 대출을 선택해주세요. / {대출명} 선택됨 · {첫 번째 대출명} 외 {n}건 선택됨 · 변경</td></tr>
 <tr><td>추가한도 신청(참신한대출(대환))</td><td>최대 {N}만원까지 추가로 신청할 수 있어요 / 대환 후 남은 차액은 계좌로 송금해드려요. / 추가한도 신청금액(A) / 상환할 대출 합계(B) / 총 신청금액(A+B) / 신청안함 · 신청</td></tr>
-<tr><td>인지세 안내(참신한대출(대환))</td><td>신청금액이 {N}만원 초과 시 인지세가 발생해요. / 인지세는 금융회사와 고객이 각 50%씩 부담해요. / 대출 실행 시 고객 부담분이 대출금에서 차감돼요.</td></tr>
+<tr><td>인지세 안내(공통 · 한도 5,000만원 이상 상품)</td><td>· 신청금액이 5,000만원 초과 시 인지세 ? 가 발생해요. / 팝업: 신청금액이 {N}만원 초과 시 인지세가 발생해요. / 인지세는 금융회사와 고객이 각 50%씩 부담해요. / 대출 실행 시 고객 부담분이 대출금에서 차감돼요.</td></tr>
 <tr><td colspan="2" style="padding-top:22px;"><b style="color:var(--p-primary);font-size:11px;letter-spacing:.08em;text-transform:uppercase;">화면 6 · 계좌정보입력</b></td></tr>
 <tr><td>헤드라인</td><td>대출금 받을 계좌를 입력해주세요</td></tr>
 <tr><td>안내줄</td><td>이 계좌에서 매달 원금과 이자가 자동이체돼요.</td></tr>
@@ -4095,8 +4130,9 @@ export function NoticeBox({ title = "유의사항", bullets }: NoticeBoxProps) {
 <li>사회적배려대상자·취업성공자 중복 인하(0.5%p+0.1%p) 정확히 반영되는지.</li>
 <li>≥640px/<640px 분기 시 시트가 중앙 모달 ↔ 하단 바텀시트로 올바르게 전환되는지.</li>
 <li><b>참신한대출(대환)</b>  — 신청금액이 직접입력이 아닌 "상환할 대출 선택" 합계로 정확히 반영되는지, 상환불가 대출이 선택되지 않는지.</li>
-<li><b>참신한대출(대환)</b>  — 상환할 대출 선택 후 잔여 한도가 있을 때만 추가한도 신청 팝업이 뜨는지, A+B 합산액이 최종 신청금액과 일치하는지.</li>
-<li><b>참신한대출(대환)</b>  — 신청(대환포함)금액 5,000만원 초과 시 인지세 안내가 정확히 노출되는지("인지세 ? 가 발생해요." 줄바꿈 안 끊김), 대출자금 용도가 "타행대환"으로 고정 표시(화살표 없음)되는지, 선택 요약 칩 "○○ 외 N건 선택됨 · 변경" 동작.</li>
+<li><b>참신한대출(대환)</b>  — 상환할 대출 선택 [확인] 후 잔여 한도가 있을 때만 추가한도 입력 시트가 이어지는지(최대 = 한도 − 선택 합계), A+B가 신청금액에 자동 입력되고 직접 수정이 안 되는지. 선택 전 [확인] 시 "상환할 대출을 선택해주세요." 에러.</li>
+<li><b>참신한대출(대환)</b>  — 요약 칩 문구(1건 "{대출명} 선택됨" / 2건 이상 "{첫 번째} 외 n건 선택됨"), 칩 누르면 선택 시트가 이전 선택 상태로 다시 열리는지.</li>
+<li><b>인지세 안내(공통)</b>  — 상품 한도 5,000만원 이상 상품에서만 신청금액 아래에 노출되는지(대환은 항상 노출, 한도 5,000만원 미만 상품은 미노출), <b>참신한대출(대환)</b>  — 인지세 안내가 정확히 노출되는지("인지세 ? 가 발생해요." 줄바꿈 안 끊김), 대출자금 용도가 "타행대환"으로 고정 표시(화살표 없음)되는지, 선택 요약 칩 "○○ 외 N건 선택됨 · 변경" 동작.</li>
 </ul>
 </div>
 <div class="panel" style="margin-top:16px;">
